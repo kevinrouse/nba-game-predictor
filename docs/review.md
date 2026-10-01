@@ -1,0 +1,75 @@
+# Results and review
+
+## Basketball prediction
+
+The project estimates a designated-home win probability before a historical NBA regular-season game. It is separate from the archived playoff-series project. Series length, bracket simulations and a playoff transfer test are outside this implementation's scope.
+
+There are 11,979 regular-season games in the supplied files and 10,418 after requiring ten previous games for both teams. The raw dimensions are 27,144 × 41 for team data and 434,797 × 59 for player data. The final fit uses 9,344 games through 2022–23. The reserved 2023–24 season supplies 1,074 eligible games; 156 opening games are excluded by the fixed warmup rule.
+
+## What survived development
+
+The initial training set is 2014–15 through 2016–17. Six expanding windows validate 2017–18 through 2022–23, always using earlier seasons for training. The 74 candidate configurations and their scores are stored in `artifacts/tables/candidate_configs.json` and `cv_summary.csv`.
+
+Mean validation-season log loss:
+
+| Approach | Loss |
+|---|---:|
+| Home win rate | 0.684844 |
+| Win-percentage baseline | 0.634187 |
+| Net-rating baseline | 0.630585 |
+| Best team-only model | 0.628126 |
+| Team + five-game form | 0.627567 |
+| Team + ten-game form | 0.626960 |
+| Team + twenty-game form | 0.626720 |
+| Team + player histories | 0.624979 |
+| Team + twenty-game form + players | 0.624380 |
+| Best random forest | 0.630754 |
+| Best gradient boosting | 0.628728 |
+
+The selection rule, fixed in `evaluation-plan.md`, prefers fewer inputs within 0.001 of the best score. That selects **L1 team + player histories, C=0.1**, with 22 candidate input differences. The final fit has 19 nonzero coefficients; top-five minute share, top-seven minute share and minute continuity shrink to zero. The extra recent-team-form inputs are excluded because their validation advantage is smaller than the tolerance. The six-input compact candidate is simpler but worse at 0.626962, outside the tolerance. Unregularized team + players is 0.626032; the best L2 version is 0.625605. L1's edge is small and dataset-specific.
+
+The selected settings are L1 ratio 1, C 0.1, liblinear, 3,000 maximum iterations and seed 78. Median imputation and standardization are inside the fold-fitted pipeline. Home court is represented by the intercept. There are no arbitrary interaction terms. The [feature definitions](data-and-features.md) enumerate every measure and the input exclusions.
+
+Player histories improve the matching L1 team-only comparison in five of six validation years. They worsen 2022–23 by 0.00090. Those comparisons were used to make choices, so they do not independently establish the isolated benefit of players in future seasons.
+
+## The reserved season
+
+| Model | Log loss | Brier | AUC | Accuracy |
+|---|---:|---:|---:|---:|
+| Selected model | 0.602463 | 0.207969 | 0.734480 | 67.32% |
+| Home win rate | 0.692934 | 0.249875 | 0.500000 | 53.72% |
+| Win-percentage baseline | 0.612245 | 0.212894 | 0.720800 | 64.90% |
+| Net-rating baseline | 0.611991 | 0.212711 | 0.720622 | 64.53% |
+
+The selected model's 95% test log-loss interval is [0.575112, 0.628364]. The paired difference from net rating is −0.009528, with interval [−0.015518, −0.003192]. Brier difference is −0.004742, interval [−0.007419, −0.002023]. These use 2,000 paired resamples of 22 calendar-week blocks, recomputing a game-weighted mean within each draw. They capture some local schedule dependence but not dependence across week boundaries, model-selection uncertainty, or between-season variation.
+
+Predicted home wins average 56.08%, versus 53.72% observed. Calibration slope is 1.0583, intercept −0.1259, and ten-bin absolute calibration error 0.0367. Bin counts range from 17 to 199. Wilson intervals are descriptive within-bin intervals, not a complete dependence adjustment. Neither the test diagnostics nor error analysis changes the frozen model.
+
+## Basketball observations
+
+- Development home win rate is 57.16%; it varies across seasons.
+- Team-seasons average 60.21% of recent minutes in their top five players. Minnesota 2017–18 has the lowest average minute-share volatility and Boston 2020–21 the highest among development team-seasons. These are data descriptions, not injury narratives.
+- Season net rating and prior-ten-game net rating correlate at 0.794. Recent strength is substantially overlapping information.
+- The biggest test miss is Detroit at Dallas, April 12, 2024: Dallas had a 91.53% prediction and lost 89–107. Charlotte at Minnesota on January 22 is another major miss, with Minnesota at 91.16% and losing 125–128.
+- Toronto won 27.78% of eligible games against a 41.60% predicted rate. The Lakers won 59.15% against 52.20% predicted. Team residuals are descriptive and do not identify the reason for the gap.
+- `player_prediction_changes.csv` shows the largest development probability changes between separately fitted team and team+player models. These are not causal player effects.
+
+## Critical review
+
+**Statistical quality.** Inputs end before game dates, mutation/truncation tests verify the boundary, and learned preprocessing uses training folds only. The final season does not select the model. Model-selection scores can be optimistic after trying 74 configurations; the held-out season is the independent result. One season limits generalization claims.
+
+**Predictive quality.** The final model improves on each baseline in the reserved season, and player gains occur in five of six development seasons. It still overestimates home advantage somewhat. A strong forest training score does not translate into better later-season probabilities: the 20-leaf-minimum combined forest has training loss 0.5246 versus validation 0.6321. The selected logistic model has 0.6036 versus 0.6250. That supports retaining the simpler fit.
+
+**Code and reproducibility.** Direct functions handle the joins, histories and model comparison; no framework or class hierarchy is needed. Only source data and prior rows determine the features. Compressed sources, derived tables and model artifacts are included, with separate minimal runtime and analysis requirements. Seeds and relative paths support reproduction.
+
+**Communication.** The public story is basketball prediction. The app separates probabilities from results and validation from the final test. Notebook findings report small effects cautiously. Correlated coefficients are not presented as causal effects; weak sign changes are not converted into basketball claims.
+
+**Scope.** The site offers histories and held-out game predictions, not a live injury-aware service. There is no evidence to support a 2024 playoff simulation from these files, and the revised project does not need one. Opening games, unobserved current roster information and neutral sites remain limitations.
+
+## Verification
+
+Eight tests pass, covering source reconciliation, unique matchups, strictly earlier dates, current/future mutation invariance, truncation invariance, historical role weights, removal of a current roster, frozen model/preprocessing integrity, probability sums, selection logic, bootstrap pairing, and all eight app pages with representative selector combinations. The four notebooks execute with stored outputs and no cell errors. Static checks pass. The local Streamlit app renders on desktop and at a 390-pixel viewport without horizontal body overflow.
+
+A fresh local clone with a newly created Python 3.11 environment installed `requirements-dev.txt` and completed `python -m scripts.reproduce`. All four notebooks and all eight tests passed again. Pregame team, player-role and matchup files reproduced byte for byte. Final predictions, metrics, bootstrap intervals, coefficient tables and validation summaries matched to 1e-10. The model selection was identical, and private notes were absent from the clone. Browser navigation through all eight pages produced no JavaScript errors.
+
+Private interview notes, environments, credentials, caches, original R session files, editor files and notebook checkpoints are excluded from Git. The original playoff repository remains unchanged. Cloud deployment still requires an authenticated Streamlit session; see [deployment status](deployment.md).
