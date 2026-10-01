@@ -47,6 +47,6 @@ To publish a deliberately changed model, review the evaluation design and artifa
 - **Validate the published project:** install dependencies, lint, verify exact release files and notebook output status, and run the test suite.
 - **Rebuild the analysis from source:** rebuild all models and reports, execute the notebooks, run tests and compare the results with the committed tables and selection.
 
-The jobs run on Linux with Python 3.11 and read-only repository permissions. Action versions are pinned to commit hashes. A successful reproduction uploads the executed notebooks, narrative figures and new diagnostic tables as a seven-day workflow artifact; it does not commit generated changes back to the repository.
+The jobs run on Linux with Python 3.11 and read-only repository permissions. Action versions are pinned to commit hashes. The rebuild saves notebooks, figures and analytical tables as a seven-day workflow artifact, including diagnostics when verification fails. This makes discrepancies inspectable; it does not commit generated changes back to the repository.
 
 For the interactive app, see the [deployment guide](deployment.md). The app uses cached local tables, invalidating table reads when their file modification times change after a rebuild.

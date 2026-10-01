@@ -47,6 +47,7 @@ jobs:
       - run: python -m scripts.reproduce
       - run: python -m scripts.verify_reproduction
       - name: Save the executed analysis
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: reproduced-analysis
@@ -55,4 +56,7 @@ jobs:
             artifacts/figures/story_*.png
             artifacts/tables/selection_replay*.csv
             artifacts/tables/block_sensitivity.csv
+            artifacts/tables/*.csv
+            artifacts/tables/cv_predictions.csv.gz
+            artifacts/checks/*.csv
           retention-days: 7

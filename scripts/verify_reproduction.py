@@ -8,6 +8,7 @@ are verified separately before rebuilding, because serialization is not portable
 import gzip
 import io
 import json
+import platform
 import subprocess
 
 import numpy as np
@@ -51,6 +52,7 @@ def main():
         text=True,
     ).stdout.splitlines()
     checked = 0
+    failures, differences = [], []
     for name in names:
         if not name.endswith((".csv", ".csv.gz")):
             continue
@@ -59,7 +61,49 @@ def main():
             io.BytesIO(gzip.decompress(raw) if name.endswith(".gz") else raw)
         )
         actual = pd.read_csv(ROOT / name)
-        assert_same_table(expected, actual, name)
+        try:
+            assert_same_table(expected, actual, name)
+        except AssertionError as error:
+            failures.append(name)
+            print(str(error).splitlines()[0], flush=True)
+            if expected.shape == actual.shape and expected.columns.equals(
+                actual.columns
+            ):
+                for column in expected.select_dtypes(include="number"):
+                    different = ~np.isclose(
+                        expected[column],
+                        actual[column],
+                        rtol=1e-7,
+                        atol=1e-8,
+                        equal_nan=True,
+                    )
+                    if not different.any():
+                        continue
+                    group = (
+                        "name"
+                        if "name" in expected
+                        else "model"
+                        if "model" in expected
+                        else None
+                    )
+                    delta = (expected[column] - actual[column]).abs()
+                    detail = pd.DataFrame(
+                        {
+                            "group": expected[group] if group else "all",
+                            "difference": delta,
+                            "changed": different,
+                        }
+                    )
+                    for label, rows in detail[detail.changed].groupby("group"):
+                        differences.append(
+                            dict(
+                                file=name,
+                                column=column,
+                                group=label,
+                                rows=len(rows),
+                                max_absolute_difference=rows.difference.max(),
+                            )
+                        )
         checked += 1
     name = "artifacts/models/selection.json"
     expected = json.loads(committed_bytes(name))
@@ -69,6 +113,19 @@ def main():
     if actual != expected:
         raise ValueError("Reproduction changed the selected model or evaluation design")
     np.testing.assert_allclose(actual_loss, expected_loss, rtol=1e-7, atol=1e-8)
+    if failures:
+        directory = ROOT / "artifacts/checks"
+        directory.mkdir(exist_ok=True)
+        detail = pd.DataFrame(differences)
+        detail.to_csv(directory / "reproduction_differences.csv", index=False)
+        print(detail.to_string(index=False), flush=True)
+        print(
+            f"Runtime: {platform.system()} {platform.machine()} Python {platform.python_version()}",
+            flush=True,
+        )
+        raise AssertionError(
+            f"Reproduction differed in {len(failures)} tables; see artifacts/checks/reproduction_differences.csv"
+        )
     print(f"Reproduced {checked} published tables and the original model selection")
 
 

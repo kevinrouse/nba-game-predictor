@@ -20,3 +20,4 @@ INTERVIEW_NOTES.md
 .coverage
 /tmp/
 /artifacts/scratch/
+/artifacts/checks/
