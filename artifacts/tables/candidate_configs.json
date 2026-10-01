@@ -1,0 +1,510 @@
+[
+  {
+    "name": "Home win rate",
+    "kind": "home",
+    "features": "net_rating"
+  },
+  {
+    "name": "Baseline win_pct",
+    "kind": "logistic",
+    "features": "win_pct",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "Baseline net_rating",
+    "kind": "logistic",
+    "features": "net_rating",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "Logistic team",
+    "kind": "logistic",
+    "features": "team",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 team C=0.01",
+    "kind": "logistic",
+    "features": "team",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 team C=0.1",
+    "kind": "logistic",
+    "features": "team",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 team C=1",
+    "kind": "logistic",
+    "features": "team",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 team C=0.01",
+    "kind": "logistic",
+    "features": "team",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 team C=0.1",
+    "kind": "logistic",
+    "features": "team",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 team C=1",
+    "kind": "logistic",
+    "features": "team",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic team_players",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 team_players C=0.01",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 team_players C=0.1",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 team_players C=1",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 team_players C=0.01",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 team_players C=0.1",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 team_players C=1",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic recent5",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent5 C=0.01",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent5 C=0.1",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent5 C=1",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 recent5 C=0.01",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 recent5 C=0.1",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 recent5 C=1",
+    "kind": "logistic",
+    "features": "recent5",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic combined5",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined5 C=0.01",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined5 C=0.1",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined5 C=1",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 combined5 C=0.01",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 combined5 C=0.1",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 combined5 C=1",
+    "kind": "logistic",
+    "features": "combined5",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic recent10",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent10 C=0.01",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent10 C=0.1",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent10 C=1",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 recent10 C=0.01",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 recent10 C=0.1",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 recent10 C=1",
+    "kind": "logistic",
+    "features": "recent10",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic combined10",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined10 C=0.01",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined10 C=0.1",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined10 C=1",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 combined10 C=0.01",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 combined10 C=0.1",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 combined10 C=1",
+    "kind": "logistic",
+    "features": "combined10",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic recent20",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent20 C=0.01",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent20 C=0.1",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 recent20 C=1",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 recent20 C=0.01",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 recent20 C=0.1",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 recent20 C=1",
+    "kind": "logistic",
+    "features": "recent20",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic combined20",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined20 C=0.01",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined20 C=0.1",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 combined20 C=1",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 combined20 C=0.01",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 combined20 C=0.1",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 combined20 C=1",
+    "kind": "logistic",
+    "features": "combined20",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Logistic compact",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 100000000.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 compact C=0.01",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 0.01,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 compact C=0.1",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 0.1,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L2 compact C=1",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 1.0,
+    "l1_ratio": 0
+  },
+  {
+    "name": "L1 compact C=0.01",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 0.01,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 compact C=0.1",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  {
+    "name": "L1 compact C=1",
+    "kind": "logistic",
+    "features": "compact",
+    "C": 1.0,
+    "l1_ratio": 1
+  },
+  {
+    "name": "Forest team leaf=20",
+    "kind": "forest",
+    "features": "team",
+    "min_samples_leaf": 20
+  },
+  {
+    "name": "Forest team leaf=60",
+    "kind": "forest",
+    "features": "team",
+    "min_samples_leaf": 60
+  },
+  {
+    "name": "Boosting team leaves=3",
+    "kind": "boosting",
+    "features": "team",
+    "max_leaf_nodes": 3
+  },
+  {
+    "name": "Boosting team leaves=7",
+    "kind": "boosting",
+    "features": "team",
+    "max_leaf_nodes": 7
+  },
+  {
+    "name": "Forest combined10 leaf=20",
+    "kind": "forest",
+    "features": "combined10",
+    "min_samples_leaf": 20
+  },
+  {
+    "name": "Forest combined10 leaf=60",
+    "kind": "forest",
+    "features": "combined10",
+    "min_samples_leaf": 60
+  },
+  {
+    "name": "Boosting combined10 leaves=3",
+    "kind": "boosting",
+    "features": "combined10",
+    "max_leaf_nodes": 3
+  },
+  {
+    "name": "Boosting combined10 leaves=7",
+    "kind": "boosting",
+    "features": "combined10",
+    "max_leaf_nodes": 7
+  }
+]

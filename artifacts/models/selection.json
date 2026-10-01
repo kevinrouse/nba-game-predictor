@@ -1,0 +1,55 @@
+{
+  "config": {
+    "name": "L1 team_players C=0.1",
+    "kind": "logistic",
+    "features": "team_players",
+    "C": 0.1,
+    "l1_ratio": 1
+  },
+  "features": [
+    "net_rating_diff",
+    "win_pct_diff",
+    "efg_diff",
+    "opp_efg_diff",
+    "tov_rate_diff",
+    "oreb_rate_diff",
+    "dreb_rate_diff",
+    "ft_rate_diff",
+    "rest_days_diff",
+    "back_to_back_diff",
+    "games_last7_diff",
+    "top5_share_diff",
+    "top7_share_diff",
+    "rotation_size_diff",
+    "minute_continuity_diff",
+    "starter_continuity_diff",
+    "rotation_volatility_diff",
+    "scoring_concentration_diff",
+    "usage_concentration_diff",
+    "weighted_ppa_diff",
+    "weighted_absence_diff",
+    "weighted_participation_diff"
+  ],
+  "train_seasons": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "validation_seasons": [
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "test_season": 2023,
+  "rule": "Within 0.001 of minimum mean validation log loss: fewer features, then logistic, then score",
+  "validation_log_loss": 0.6249791716462022
+}
