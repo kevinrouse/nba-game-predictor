@@ -1,0 +1,667 @@
+---
+title: "Data Science Project"
+author: "Kevin Rouse"
+date: "`r format(Sys.Date(), '%m/%d/%y')`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r set options, include=FALSE}
+# DO NOT CHANGE THE LINE BELOW 
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+``` {css styling, echo=FALSE}
+
+<style>
+.tocify {
+max-width: 175px !important;
+}
+</style>
+
+<style>
+.main-container {
+width: 100%;
+max-width: 940px;
+margin-left: 250px;
+margin-right: auto;
+}
+</style>
+
+<style>
+.red-header {
+  color: red;
+}
+</style>
+
+```
+
+```{r logo, echo = FALSE}
+
+htmltools::img(src = 'https://cdn.nba.com/logos/nba/1610612760/primary/L/logo.svg',
+                height = '250px',
+                alt = 'logo',
+                style = 'position: fixed; top: -40px; left: 5px;')
+```
+
+
+# Introduction  
+
+The purpose of this project is to gauge your technical skills and problem solving ability by working through something similar to a real NBA data science project. You will work your way through this R Markdown document, answering questions as you go along. Please begin by adding your name to the "author" key in the YAML header. When you're finished with the document, come back and type your answers into the answer key at the top. Please leave all your work below and have your answers where indicated below as well. Please note that we will be reviewing your code so make it clear, concise and avoid long printouts. Feel free to add in as many new code chunks as you'd like.
+
+Remember that we will be grading the quality of your code and visuals alongside the correctness of your answers. Please try to use the tidyverse as much as possible (instead of base R and explicit loops). Please do not bring in any outside data.    
+
+**Note:**    
+
+**Throughout this document, any `season` column represents the year each season started. For example, the 2015-16 season will be in the dataset as 2015. For most of the rest of the project, we will refer to a season by just this number (e.g. 2015) instead of the full text (e.g. 2015-16).**   
+
+<h1 class="red-header">Answers</h1>  
+
+## Part 1      
+
+**Question 1:**   
+
+-Offensive: 56.3% eFG     
+-Defensive: 47.9% eFG      
+
+**Question 2:** 81.6%   
+
+**Question 3:** 46.2%     
+
+**Question 4:** This is a written question. Please leave your response in the document under Question 5.          
+
+**Question 5:** 83.3% of games      
+
+**Question 6:**     
+
+- Round 1: XX.X%   
+- Round 2: XX.X%   
+- Conference Finals: XX.X%    
+- Finals: XX.X%    
+
+**Question 7:**     
+
+- Percent of +5.0 net rating teams making the 2nd round next year: XX.X%     
+- Percent of top 5 minutes played players who played in those 2nd round series: XX.X%    
+
+
+## Part 2  
+
+Please show your work in the document, you don't need anything here.
+
+## Part 3    
+ 
+Please write your response in the document, you don't need anything here.    
+
+
+
+# Setup and Data    
+
+```{r load data, message = F, warning = F}
+library(tidyverse)
+# Make sure we are in our project directory
+setwd("/Users/kevinrouse78/Desktop/Thunder_Project")
+# Read in data
+player_data <- read_csv("Data/player_game_data.csv")
+team_data <- read_csv("Data/team_game_data.csv")
+```
+
+## Part 1 -- Data Cleaning           
+
+In this section, you're going to work to answer questions using data from both team and player stats. All provided stats are on the game level. 
+
+Before working with the data, I like to check for missingness levels among the variables
+```{r}
+# Check for missing values in the team_data dataset
+team_missing_values <- team_data %>%
+  summarise_all(~sum(is.na(.)))
+
+# Display columns with missing values and the number of missing values
+team_missing_values %>%
+  gather(key = "Column", value = "MissingValues") %>%
+  filter(MissingValues > 0)
+
+# Do the same for the player_data
+# Check for missing values in the player_data dataset
+player_missing_values <- player_data %>%
+  summarise_all(~sum(is.na(.)))
+
+# Display columns with missing values and the number of missing values
+player_missing_values %>%
+  gather(key = "Column", value = "MissingValues") %>%
+  filter(MissingValues > 0)
+```
+We have 4 missing values in the player name column in the player data
+```{r}
+# filter out to get missing players
+missing_players <- player_data %>%
+  filter(is.na(player_name))
+print(missing_players)
+```
+We can see that these players have their nbapersonid's so we will retreive their names and add them
+```{r}
+# make a player reference with each players name and ID
+player_reference <- player_data %>%
+  filter(!is.na(player_name)) %>%
+  select(nbapersonid, player_name) %>%
+  distinct()
+# Join the missing player names with the reference dataset to get the missing player names
+updated_missing_players <- missing_players %>%
+  left_join(player_reference, by = "nbapersonid") %>%
+  select(-player_name.x) %>%
+  rename(player_name = player_name.y)
+
+# Display the updated names
+print(updated_missing_players$player_name)
+```
+These players only appear once and do not have a name so I couldn't match based on ID. I have decided to remove these players from the dataset.
+```{r}
+#remove players with no name
+player_data <- player_data %>%
+  filter(!is.na(player_name))
+```
+
+We're ready to start the analysis now. Let's delete some of the variables we created that we likely won't use again for cleanliness
+```{r}
+rm(missing_players)
+rm(player_missing_values)
+rm(team_missing_values)
+rm(updated_missing_players)
+```
+
+### Question 1  
+
+**QUESTION:** What was the Warriors' Team offensive and defensive eFG% in the 2015-16 regular season? Remember that this is in the data as the 2015 season.  
+
+#Let's start with the offensive eFG$
+```{r}
+#Subset the data to be only warriors data from the 2015 season
+warriors_2015 <- team_data %>%
+  filter(season == 2015 & (off_team == "GSW" | def_team == "GSW") & gametype == 2)
+
+# Calculate offensive eFG% for Warriors
+warriors_offensive_stats <- warriors_2015 %>%
+  filter(off_team == "GSW") %>%
+  summarise(
+    FGM = sum(fgmade),
+    FG3M = sum(fg3made),
+    FGA = sum(fgattempted)
+  ) %>%
+  mutate(
+    eFG_offensive = ((FGM + FG3M * 0.5) / FGA) * 100
+  )
+print(warriors_offensive_stats$eFG_offensive)
+
+# Let's do the same for defense
+warriors_defensive_stats <- warriors_2015 %>%
+  filter(def_team == "GSW") %>%
+  summarise(
+    FGM = sum(fgmade),
+    FG3M = sum(fg3made),
+    FGA = sum(fgattempted)
+  ) %>%
+  mutate(
+    eFG_defensive = ((FGM + FG3M * 0.5) / FGA) * 100
+  )
+print(warriors_defensive_stats$eFG_defensive)
+```
+
+<span style="color:red">**ANSWER 1:**</span>  
+
+Offensive: 56.3% eFG     
+Defensive: 47.9% eFG     
+
+
+### Question 2     
+
+**QUESTION:** What percent of the time does the team with the higher eFG% in a given game win that game? Use games from the 2014-2023 regular seasons. If the two teams have an exactly equal eFG%, remove that game from the calculation.  
+
+Since we are interested in the eFG% in ever game, let's add this column to the dataset and compare the eFG%'s to the winner on a gamely basis
+```{r}
+# created eFG% column using the formula
+team_data <- team_data %>%
+  mutate(
+    eFG = (fgmade + fg3made * 0.5) / fgattempted
+  )
+# We are interested in only 2014-2023 games
+team_data_2014_to_2023 <- team_data %>%
+  filter(gametype==2 & (2014 <= season & season<= 2023))
+
+# Group by game so each game is its own row
+games_2014_to_2023_efg <- team_data_2014_to_2023 %>%
+  group_by(nbagameid) %>%
+  summarise(
+    home_team = off_team[which(off_home == 1)],
+    home_efg = eFG[which(off_home == 1)],
+    home_points = points[which(off_home == 1)],
+    away_team = off_team[which(off_home == 0)],
+    away_efg = eFG[which(off_home == 0)],
+    away_points = points[which(off_home == 0)]
+  )
+
+# Determine the winner and compare eFG%
+games_2014_to_2023_efg <- games_2014_to_2023_efg %>%
+  mutate(
+    winner = if_else(home_points > away_points, home_team, away_team),
+    higher_efg_team = if_else(home_efg > away_efg, home_team, away_team)
+  )
+
+# Remove games with equal eFG% 
+games_2014_to_2023_efg_filtered <- games_2014_to_2023_efg %>%
+  filter(home_efg != away_efg)
+
+# Calculate the percentage
+higher_efg_wins <- games_2014_to_2023_efg_filtered %>%
+  summarise(
+    total_games = n(),
+    higher_efg_wins = sum(winner == higher_efg_team)
+  ) %>%
+  mutate(
+    percent_higher_efg_wins = higher_efg_wins / total_games * 100
+  )
+print(higher_efg_wins$percent_higher_efg_wins)
+```
+
+<span style="color:red">**ANSWER 2:**</span>  
+
+81.6%   
+
+### Question 3  
+
+**QUESTION:** What percent of the time does the team with more offensive rebounds in a given game win that game? Use games from the 2014-2023 regular seasons. If the two teams have an exactly equal number of offensive rebounds, remove that game from the calculation.   
+
+Here, we will take a similar approach to the last question, but instead of looking at eFG%, we will be looking at offensive rebounds
+```{r}
+# We already subsetted a df with team data from the 2014-2023 regular seasons
+team_data_2014_to_2023_oreb <- team_data_2014_to_2023 %>%
+  group_by(nbagameid) %>%
+  summarise(
+    home_team = off_team[which(off_home == 1)],
+    home_oreb = reboffensive[which(off_home == 1)],
+    home_points = points[which(off_home ==1)],
+    away_team = off_team[which(off_home ==0)],
+    away_oreb = reboffensive[which(off_home ==0)],
+    away_points = points[which(off_home == 0)]
+  )
+
+# Determine which team won and which team had more offensive rebounds
+team_data_2014_to_2023_oreb <- team_data_2014_to_2023_oreb %>% 
+  mutate(
+    winner = if_else(home_points > away_points, home_team, away_team),
+    higher_oreb_team = if_else(home_oreb > away_oreb, home_team, away_team)
+  )
+
+# Remove games with equal orebs 
+team_data_2014_to_2023_oreb_filtered <- team_data_2014_to_2023_oreb %>%
+  filter(home_oreb != away_oreb)
+
+# Calculate the percentage
+higher_oreb_wins <- team_data_2014_to_2023_oreb_filtered %>%
+  summarise(
+    total_games = n(),
+    higher_oreb_wins = sum(winner == higher_oreb_team)
+  ) %>%
+  mutate(
+    percent_higher_oreb_wins = higher_oreb_wins / total_games * 100
+  )
+print(higher_oreb_wins$percent_higher_oreb_wins)
+```
+
+<span style="color:red">**ANSWER 3:**</span>  
+
+46.2%   
+
+### Question 4  
+
+**QUESTION:** Do you have any theories as to why the answer to question 3 is lower than the answer to question 2? Try to be clear and concise with your answer.  
+
+<span style="color:red">**ANSWER 4:**</span>    
+For the effective field goal percentage question, it is logical that the team that shoots more efficiently will score more points. There are also no notable potential downsides associated with shooting effectively from the field.
+
+Upon first thought, one would think that getting more offensive rebounds is a good sign, perhaps meaning that the team will have more chances to score. However, there is a notable potential downside which is associated with a team getting more offensive rebounds. These teams likely are missing more shots and are not shooting as efficiently, giving them more chances to get offensive rebounds. 
+
+Another consideration is that a team that focuses on getting offensive rebounds may struggle more at transition defense since their efforts are focused on crashing the glass, which could lead to some fastbreak/transition baskets on the other end. 
+
+If I were to explore this further, I would look at the association between offensive rebounds and effective field goal percentage, and my guess would be that teams with more offensive rebounds are likely to be shooting worse from the field, potentially indicating the offense may be struggling against the opposing defense.
+
+
+
+### Question 5   
+
+**QUESTION:** Look at players who played at least 25% of their possible games in a season and scored at least 25 points per game played. Of those player-seasons, what percent of games were they available for on average? Use games from the 2014-2023 regular seasons.     
+
+For example:   
+
+- Ja Morant does not count in the 2023-24 season, as he played just 9 out of 82 games this year, even though he scored 25.1 points per game.   
+- Chet Holmgren does not count in the 2023-24 season, as he played all 82 games this year but scored 16.5 points per game.  
+- LeBron James does count in the 2023-24 season, as he played 71 games and scored 25.7 points per game.  
+
+```{r}
+# Filter for regular season games from 2014 to 2023
+player_data_filtered <- player_data %>%
+  filter(season >= 2014, season <= 2023, gametype == 2)
+
+# Calculate total possible games, games played, and total points for each player-season
+player_season_stats <- player_data_filtered %>%
+  group_by(season, player_name) %>%
+  summarise(
+    # total possible game is number of rows for that player in a season
+    total_games = n(),
+    games_played = sum(missed == 0),
+    total_points = sum(points, na.rm = TRUE),
+    points_per_game = total_points / games_played
+  ) %>%
+  ungroup()
+
+# Filter players who played at least 25% of their possible games and scored at least 25 points per game
+qualified_players <- player_season_stats %>%
+  filter(games_played / total_games >= 0.25, points_per_game >= 25)
+
+# Calculate the average availability percentage for these players
+average_availability <- qualified_players %>%
+  summarise(
+    average_availability = mean(games_played / total_games) * 100
+  )
+print(average_availability$average_availability)
+```
+
+<span style="color:red">**ANSWER 5:**</span>  
+
+83.3% of games     
+
+## Question 6  
+
+**QUESTION:** What % of playoff series are won by the team with home court advantage? Give your answer by round. Use playoffs series from the 2014-**2022** seasons. Remember that the 2023 playoffs took place during the 2022 season (i.e. 2022-23 season).
+
+This question is a bit more advanced in terms of determining the round the game was and which team had home court advantage for the series
+
+```{r}
+# Filter for playoff games from 2014 to 2022
+# Note i only wanted one game per row and didnt need statistics on game data so only looked
+# at games where the offensice team was home (now have one instance per game)
+playoff_data_filtered <- team_data %>%
+  filter(season >= 2014, season <= 2022, gametype == 4, off_home == 1)
+
+# Sort games by season, team, and date
+playoff_data_sorted <- playoff_data_filtered %>%
+  arrange(season, off_team, gamedate)
+
+# Assign round number based on the order of games for each season and team
+playoff_data_with_rounds <- playoff_data_sorted %>%
+  group_by(season, off_team) %>%
+  arrange(gamedate) %>%
+  mutate(round = cumsum(!duplicated(def_team))) %>%
+  ungroup()
+
+# Create a unique matchup label for each round with team abbreviations ordered alphabetically
+playoff_data_with_rounds <- playoff_data_with_rounds %>%
+  mutate(matchup_label = paste(pmin(off_team, def_team), pmax(off_team, def_team), sep = "_"))
+
+# Group by season and matchup to determine home court advantage (the team that plays Game 1 of the series at home has home court advantage)
+series_home_court_advantage <- playoff_data_with_rounds %>%
+  group_by(season, matchup_label) %>%
+  arrange(gamedate) %>%
+  # look at Game 1 of the series
+  slice(1) %>%
+  mutate(home_court_advantage = off_team) %>%
+  mutate(away_court = def_team) %>%
+  ungroup() %>%
+  # away court means that team did not have home court advantage for the series
+  select(season, round, matchup_label, home_court_advantage, away_court)
+
+# Merge back the home court advantage information into the original data
+playoff_data_with_home_court <- playoff_data_with_rounds %>%
+  left_join(series_home_court_advantage, by = c("season", "round", "matchup_label"))
+
+# Determine the winner of each game
+playoff_data_with_home_court <- playoff_data_with_home_court %>%
+  mutate(game_winner = if_else(off_win == 1, off_team, def_team))
+
+# Summarize series results to determine the winner based on the number of wins
+series_results <- playoff_data_with_home_court %>%
+  group_by(season, matchup_label, round, home_court_advantage,away_court) %>%
+  summarise(
+    off_team_wins = sum(game_winner == home_court_advantage),
+    def_team_wins = sum(game_winner != home_court_advantage),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    series_winner = if_else(off_team_wins > def_team_wins, home_court_advantage, away_court)
+  ) 
+
+# Display the result to verify the rounds, matchup labels, and series winners
+result <- series_results %>%
+  select(season, matchup_label, round, home_court_advantage, series_winner) %>%
+  arrange(season, round, matchup_label) %>%
+  distinct()
+
+print(result)
+
+# Calculate the percentage of the time that the team with home court advantage wins for each round
+home_court_advantage_stats <- result %>%
+  mutate(home_court_winner = if_else(series_winner == home_court_advantage, 1, 0)) %>%
+  group_by(round) %>%
+  summarise(
+    total_series = n(),
+    home_court_wins = sum(home_court_winner),
+    percent_home_court_wins = (home_court_wins / total_series) * 100,
+    .groups = 'drop'
+  )
+
+# Display the results
+print(home_court_advantage_stats)
+
+```
+
+
+<span style="color:red">**ANSWER 6:**</span>   
+
+Round 1: 84.7%   
+Round 2: 63.9.X%   
+Conference Finals: 55.6%    
+Finals: 77.8%    
+
+
+## Question 7    
+
+**QUESTION:** Among teams that had at least a +5.0 net rating in the regular season, what percent of them made the second round of the playoffs the **following** year? Among those teams, what percent of their top 5 total minutes played players (regular season) in the +5.0 net rating season played in that 2nd round playoffs series? Use the 2014-2021 regular seasons to determine the +5 teams and the 2015-2022 seasons of playoffs data.
+
+For example, the Thunder had a better than +5 net rating in the 2023 season. If we make the 2nd round of the playoffs **next** season (2024-25), we would qualify for this question. Our top 5 minutes played players this season were Shai Gilgeous-Alexander, Chet Holmgren, Luguentz Dort, Jalen Williams, and Josh Giddey. If three of them play in a hypothetical 2nd round series next season, it would count as 3/5 for this question.    
+
+*Hint: The definition for net rating is in the data dictionary.*     
+
+```{r}
+# First, we want to subset the regular seaon data from 2014-2021
+team_data_2014_to_2021 <- team_data %>%
+  filter(gametype==2 & (2014 <= season & season<= 2021))
+
+# Calculate ORTG for each team
+offensive_ratings <- team_data_2014_to_2021 %>%
+  group_by(season, off_team) %>%
+  summarise(
+    total_points = sum(points),
+    total_possessions = sum(possessions),
+    ortg = total_points / (total_possessions / 100),
+    .groups = 'drop'
+  ) %>%
+  rename(team = off_team)
+
+# Calculate DRTG for each team
+defensive_ratings <- team_data %>%
+  group_by(season, def_team) %>%
+  summarise(
+    total_points_allowed = sum(points),
+    total_possessions_allowed = sum(possessions),
+    drtg = total_points_allowed / (total_possessions_allowed / 100),
+    .groups = 'drop'
+  ) %>%
+  rename(team = def_team)
+
+# Combine ORTG and DRTG
+team_ratings <- offensive_ratings %>%
+  left_join(defensive_ratings, by = c("season", "team"))
+
+# Calculate Net Rating
+team_ratings <- team_ratings %>%
+  mutate(net_rating = ortg - drtg)
+
+# Filter for teams with Net Rating >= +5.0
+high_net_rating_teams <- team_ratings %>%
+  filter(net_rating >= 5.0)
+
+print(high_net_rating_teams)
+```
+
+Let's get the data for the playoffs of interest (2015-2022)
+```{r}
+# Filter playoff data for seasons from 2015 to 2022
+playoff_data_filtered <- team_data %>%
+  filter(season >= 2015, season <= 2022, gametype == 4)
+
+# Sort games by season, team, and date
+playoff_data_sorted <- playoff_data_filtered %>%
+  arrange(season, off_team, gamedate)
+
+# Assign round number based on the order of games for each season and team
+playoff_data_with_rounds <- playoff_data_sorted %>%
+  group_by(season, off_team) %>%
+  arrange(gamedate) %>%
+  mutate(round = cumsum(!duplicated(def_team))) %>%
+  ungroup()
+
+# Determine which teams made the second round
+teams_in_second_round <- playoff_data_with_rounds %>%
+  filter(round == 2) %>%
+  distinct(season, off_team) %>%
+  rename(next_season = season, team = off_team)
+
+# Merge high_net_rating_teams with teams_in_second_round to see if they made it
+high_net_rating_teams_next_year <- high_net_rating_teams %>%
+  mutate(next_season = season + 1) %>%
+  inner_join(teams_in_second_round, by = c("next_season", "team"))
+
+# In order to get the percentage of teams that made the second round the next year, we need to compare the amount of rows in higher_net_rating teams to high_net_rating_teams_next_year
+
+percent_teams_second_round <- nrow(high_net_rating_teams_next_year) / nrow(high_net_rating_teams) * 100
+print(percent_teams_second_round)
+```
+
+Now, let's get the amount of minutes each player was playing and see if they played in the second round
+   
+```{r}
+# Step 1: Aggregate cumulative minutes played by each player during the regular season from 2014 to 2021
+cumulative_minutes <- player_data %>%
+  filter(season >= 2014, season <= 2021) %>%
+  group_by(season, team, player_name) %>%
+  summarise(total_minutes_played = sum(seconds / 60), .groups = 'drop')
+
+# Step 2: Identify top 5 players by total minutes played for each team in the regular season from 2014 to 2021
+top_5_players <- cumulative_minutes %>%
+  group_by(season, team) %>%
+  arrange(desc(total_minutes_played)) %>%
+  slice(1:5) %>%
+  ungroup()
+
+# Step 3: Determine which teams made the second round in the following year
+teams_in_second_round <- playoff_data_with_rounds %>%
+  filter(round == 2) %>%
+  distinct(season, off_team) %>%
+  rename(next_season = season, team = off_team)
+
+# Step 4: Merge high_net_rating_teams with teams_in_second_round to see if they made it
+high_net_rating_teams_next_year <- high_net_rating_teams %>%
+  mutate(next_season = season + 1) %>%
+  inner_join(teams_in_second_round, by = c("next_season", "team"))
+
+# Calculate the percentage of high net rating teams that made it to the second round
+percent_teams_second_round <- nrow(high_net_rating_teams_next_year) / nrow(high_net_rating_teams) * 100
+
+# Step 5: Merge top 5 players with high_net_rating_teams_next_year
+top_5_players_next_year <- top_5_players %>%
+  mutate(next_season = season + 1) %>%
+  inner_join(high_net_rating_teams_next_year, by = c("next_season", "team"))
+
+# Step 6: Get the game IDs for the second round
+second_round_game_ids <- playoff_data_with_rounds %>%
+  filter(round == 2) %>%
+  select(next_season = season, team = off_team, nbagameid)
+
+# Step 7: Check if top 5 players played in the second round
+players_in_second_round <- player_data %>%
+  filter(nbagameid %in% second_round_game_ids$nbagameid) %>%
+  mutate(next_season = season)
+
+# Merge with top_5_players_next_year to see if top 5 players played in the second round
+top_5_players_in_second_round <- top_5_players_next_year %>%
+  inner_join(players_in_second_round, by = c("next_season", "team", "player_name")) %>%
+  group_by(next_season, team) %>%
+  summarise(players_in_second_round = n_distinct(player_name), .groups = 'drop')
+
+# Step 8: Calculate the percentage of top 5 players participating in the second round
+player_participation <- top_5_players_in_second_round %>%
+  group_by(next_season, team) %>%
+  summarise(percent_players_in_second_round = players_in_second_round / 5 * 100, .groups = 'drop')
+
+# Merge with high_net_rating_teams_next_year to include only relevant teams
+final_result <- high_net_rating_teams_next_year %>%
+  left_join(player_participation, by = c("next_season", "team"))
+
+# Display the final results
+list(
+  percent_teams_second_round = percent_teams_second_round,
+  player_participation = final_result %>% select(season, team, percent_players_in_second_round)
+)
+```
+
+<span style="color:red">**ANSWER 7:**</span>
+
+Percent of +5.0 net rating teams making the 2nd round next year: 64.9%   
+Percent of top 5 minutes played players who played in those 2nd round series: XX.X%   
+
+
+## Part 2 -- Playoffs Series Modeling               
+
+For this part, you will work to fit a model that predicts the winner and the number of games in a playoffs series between any given two teams.   
+
+This is an intentionally open ended question, and there are multiple approaches you could take. Here are a few notes and specifications:    
+
+
+1. Your final output must include the probability of each team winning the series. For example: “Team A has a 30% chance to win and team B has a 70% chance.” instead of “Team B will win.” You must also predict the number of games in the series. This can be probabilistic or a point estimate.  
+
+2. You may use any data provided in this project, but please do not bring in any external sources of data.   
+
+3. You can only use data available prior to the start of the series. For example, you can’t use a team’s stats from the 2016-17 season to predict a playoffs series from the 2015-16 season.  
+
+4. The best models are explainable and lead to actionable insights around team and roster construction. We're more interested in your thought process and critical thinking than we are in specific modeling techniques. Using smart features is more important than using fancy mathematical machinery. 
+
+5. Include, as part of your answer:   
+
+  - A brief written overview of how your model works, targeted towards a decision maker in the front office without a strong statistical background.  
+  - What you view as the strengths and weaknesses of your model.  
+  - How you'd address the weaknesses if you had more time and/or more data.  
+  - Apply your model to the 2024 NBA playoffs (2023 season) and create a high quality visual (a table, a plot, or a plotly) showing the 16 teams' (that made the first round) chances of advancing to each round.  
+
+
+```{r}
+
+```
+
+## Part 3 -- Finding Insights from Your Model     
+
+Find two teams that had a competitive window of 2 or more consecutive seasons making the playoffs and that under performed your model’s expectations for them, losing series they were expected to win. Why do you think that happened? Classify one of them as bad luck and one of them as relating to a cause not currently accounted for in your model. If given more time and data, how would you use what you found to improve your model?  
+
+
+```{r}
+
+```
+
+
+<span style="color:red">**ANSWER :**</span>    
+
+
+
+
+
+
+

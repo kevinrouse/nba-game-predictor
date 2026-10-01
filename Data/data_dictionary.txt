@@ -1,0 +1,96 @@
+OKC Thunder Data Scientist Hiring Project Data Dictionary
+
+# ---------------------------------------------------------
+# player_game_data.csv
+# 
+# This dataset has player game statistical counting stats.
+# Team information in this dataset represents team stats accumulated while the player was on the court.
+# There is one row per game that the player was rostered for covered seasons/gametypes.
+# ---------------------------------------------------------
+
+# ---------------------------------------------------------
+# team_game_data.csv
+# 
+# This dataset has team game statistical counting stats.
+# Rows are all from the perspective of the offensive team. Defensive stats must be calculated by using a team's defensive row.
+# There is one row for each team's offensive stats, meaning two rows for each game (one for each team)
+# ---------------------------------------------------------
+
+### SEASONS COVERED ###
+
+Both player and team data cover the 2014-15 to 2023-24 regular seasons and. The 2004-05 to 2022-23 playoffs
+
+# Explanations for select columns
+
+### player_game_data columns ###
+
+Most columns should have self explanatory names. Below are select columns that merit additional explanation
+
+season: The starting season of an NBA calendar year. The 2023 season is the 2023-24 NBA season. This means that the 2024 playoffs took place during the 2023 season (i.e. 2023-24 season).
+
+gametype: An indicator for whether the game was from the regular season (gametype = 2) or playoffs (gametype = 4)
+
+missed: Did the player miss the game due to injury or suspension (missed = 1). A player who is available but does not play will have a value of 0 indicating that he was a DNP-CD. 
+
+seconds: The number of seconds the player played in the game
+
+offensivereboundchances: The number of opportunities the player had to grab an offensive rebound while on the court (for example, a teammate missed FGA). This is the appropriate denominator if you would like to calculate offensive rebound percentage (OREB%).
+
+defensivereboundchances: The number of opportunities the player had to grab a defensive rebound while on the court (for example, an opposing team missed FGA). This is the appropriate denominator if you would like to calculate defensive rebound percentage (DREB%).
+
+shotattempts: The total number of shots plus shooting fouls drawn by the player. Shot attempts represents the number of team shooting opportunities utilized by the player. It is the appropriate denominator for the efficiency measure points per attempt (shotattemptpoints/shotattempts). This measure is roughly equal to 2*TS% and can be used in situations when you would normally use TS%.
+
+shotattemptpoints: The total number of points scored on FGA + shooting foul FT points. It does not include player points from off ball foul FT and other non-SF free throws (like technical foul shots). It is the numerator for PPA.
+
+offensiveseconds: The number of seconds the player played on offense.
+
+offensivepossessions: The number of offensive possessions the player played. 
+
+defensiveseconds: The number of seconds the player played on defense.
+
+defensivepossessions: The number of defensive possessions the player played.
+
+teampoints: The number of points the player's team scored when he was on the court.
+
+opponentteampoints: the number of points the opponent scored when the player was on the court.
+
+teamshotattempts: the number of shot attempts the player's team took when the player was on the court (see above for shot attempt definition)
+
+
+### team_game_data columns ###
+
+Most columns should have self explanatory names. Below are select columns that merit additional explanation. All stats are team stats from the perspective of the offensive team.
+
+reboffensive: the number of offensive rebounds gathered by the offensive team. Note that this includes "team" rebounds and thus should be >= the sum of individually credited offensive rebounds for the players on that team in that game. This is the numerator for team OREB%.
+
+rebdefensive: the number of defensive rebounds (both individual and team) conceded by the offense. This is NOT the number of defensive rebounds that the offensive team got. For example, if the row lists GSW on offense and NOP on defense, rebdefensive is the number of rebounds that NOP gathered when GSW was on offense and NOP was on defense. This is the numerator for team DREB%.
+
+reboundchance: An opportunity for a rebound when the off_team was on offense and the def_team was on defense. This is the denominator for team REB% and includes both individual and team rebounds.
+
+### Common Advanced Stat Definitions ###
+
+Here are a few definitions of common measures that you may want to use:
+
+PPA = shotattemptpoints/shotattempts
+
+USG% = (shotattempts + turnovers)/(teamshotattempts + team turnovers)
+
+AST% = assists/(teamfgmade - (fg3made + fg2made)) [rephrased as: assists/(teammate made shots)]
+
+OREB% = offensiverebounds/offensivereboundchances
+
+DREB% = defensiverebounds/defensivereboundchances
+
+TOV% = turnovers/(shotattempts + turnovers) [Note that this is sometimes alternatively defined as turnovers/(possessions/100)]
+
+STL% = steals/defensivepossessions
+
+BLK% = blocks/opponentteamfg2attempted
+
+ORTG = points/(possessions/100)
+
+DRTG = points allowed/(defensive possessions/100) [Same as ORTG calculation but for the defensive team]
+
+NET RTG = ORTG - DRTG
+
+
