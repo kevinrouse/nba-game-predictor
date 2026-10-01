@@ -97,7 +97,11 @@ def main():
             importance.coefficient / importance.training_sd
         )
         save_table(
-            importance.sort_values("absolute_importance", ascending=False),
+            importance.sort_values(
+                ["absolute_importance", "feature"],
+                ascending=[False, True],
+                kind="stable",
+            ),
             "importance.csv",
         )
         (TABLES / "intercept.json").write_text(
@@ -130,7 +134,11 @@ def main():
             )
         )
         save_table(
-            importance.sort_values("absolute_importance", ascending=False),
+            importance.sort_values(
+                ["absolute_importance", "feature"],
+                ascending=[False, True],
+                kind="stable",
+            ),
             "importance.csv",
         )
     # Calibration slope/intercept are diagnostics, never used to recalibrate the test.

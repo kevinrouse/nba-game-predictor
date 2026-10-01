@@ -57,7 +57,7 @@
     "artifacts/tables/test_predictions.csv": "dbd5f7c462836cab92ba22ecde0b79d7ce637d6f82e2bdc26f5afb4c3fcaa58a",
     "artifacts/tables/record_comparison_games.csv": "3869b8c5bf92396a82ddbd3941abc3cef360c28c805938b3bd302b9960348ec8",
     "artifacts/tables/prediction_contributions.csv.gz": "fce9a7482d75494df1f61d0700fc45c2ce6f1abb2de7976ba7f09d5a175f93a3",
-    "artifacts/tables/importance.csv": "18ab65887b819311ce9702bf248e22bef823039575fd4ad2998964df56131fe4",
+    "artifacts/tables/importance.csv": "66794c425c0956c41ec87d4c6f22feedf1a7ed72717ca26712c0cceb1159887a",
     "artifacts/tables/intercept.json": "f2da28cd71e51304968d9c73684842ff7de1519ef9c587e24be0659a44023adf"
   }
 }

@@ -47,6 +47,14 @@ To publish a deliberately changed model, review the evaluation design and artifa
 - **Validate the published project:** install dependencies, lint, verify exact release files and notebook output status, and run the test suite.
 - **Rebuild the analysis from source:** rebuild all models and reports, execute the notebooks, run tests and compare the results with the committed tables and selection.
 
-The jobs run on Linux with Python 3.11 and read-only repository permissions. Action versions are pinned to commit hashes. The rebuild saves notebooks, figures and analytical tables as a seven-day workflow artifact, including diagnostics when verification fails. This makes discrepancies inspectable; it does not commit generated changes back to the repository.
+Validation runs on Linux; strict full reproduction uses macOS 14 on ARM64, matching the original training architecture. Both use Python 3.11 and read-only repository permissions. Action versions are pinned to commit hashes. The rebuild saves notebooks, figures and analytical tables as a seven-day workflow artifact, including diagnostics when verification fails. This makes discrepancies inspectable; it does not commit generated changes back to the repository.
+
+## What the cross-platform check found
+
+A complete Linux rebuild executed all notebooks and passed the tests. Its selected logistic model and published forecast results matched the reference, but refitting the four random-forest candidates produced small development-prediction differences. The largest probability difference was 0.004079 (0.41 percentage points). Two configurations changed one favorite each across all six validation seasons; the other two changed none. The largest change in a forest's mean validation loss was 0.000023. The selected model did not change.
+
+These are measured differences between the original ARM/macOS fit and the Linux/x86 refit, not evidence of a data-boundary failure. They show why a fixed random seed alone is insufficient for strict cross-platform equality of every fitted tree. The strict reproduction job therefore uses the original platform family, while Linux independently verifies release files, predictions, feature boundaries and app behavior. The numerical tolerances have not been expanded to absorb the forest differences. A Linux refit can complete the pipeline yet fail the deliberately strict comparison against the original candidate predictions.
+
+The check also exposed an unrelated presentation issue: equal zero coefficients could appear in a different row order. Coefficient reports now break importance ties by feature name, making their order deterministic without changing any coefficient or probability.
 
 For the interactive app, see the [deployment guide](deployment.md). The app uses cached local tables, invalidating table reads when their file modification times change after a rebuild.

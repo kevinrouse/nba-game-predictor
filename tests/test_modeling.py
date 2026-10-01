@@ -36,6 +36,14 @@ def test_published_predictions_match_frozen_model():
     np.testing.assert_allclose(saved.probability + saved.away_probability, 1, atol=1e-9)
     assert saved.probability.between(0, 1).all()
     assert not saved.nbagameid.duplicated().any()
+    importance = pd.read_csv(TABLES / "importance.csv")
+    aligned = importance.set_index("feature").loc[model["features"]]
+    np.testing.assert_allclose(
+        aligned.coefficient, model["model"][-1].coef_[0], atol=1e-9
+    )
+    np.testing.assert_allclose(aligned.training_sd, model["model"][1].scale_, atol=1e-9)
+    zero_features = importance.loc[importance.coefficient.eq(0), "feature"].tolist()
+    assert zero_features == sorted(zero_features)
 
 
 def test_selection_follows_prespecified_rule():

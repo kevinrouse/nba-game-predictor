@@ -90,7 +90,7 @@ python -m scripts.reproduce       # Rebuild data, all candidates, reports and ex
 python -m scripts.verify_reproduction  # Compare rebuilt tables and selection with Git HEAD
 ```
 
-[GitHub Actions](https://github.com/kevinrouse/nba-game-predictor/actions/workflows/checks.yml) runs separate validation and full-reproduction jobs. The [reproducibility guide](docs/reproducibility.md) explains exact file integrity versus numerical reproduction across platforms. [Streamlit deployment instructions](docs/deployment.md) are available; no public Cloud URL is currently verified.
+[GitHub Actions](https://github.com/kevinrouse/nba-game-predictor/actions/workflows/checks.yml) validates the published project on Linux and reproduces training on the original macOS/ARM architecture. The [reproducibility guide](docs/reproducibility.md) documents the measured random-forest refit differences across platforms and the strict checks on the published forecasts. [Streamlit deployment instructions](docs/deployment.md) are available; no public Cloud URL is currently verified.
 
 | Location | Contents |
 |---|---|

@@ -31,7 +31,9 @@ jobs:
 
   reproduce:
     name: Rebuild the analysis from source
-    runs-on: ubuntu-latest
+    # Match the architecture used for the original fitted candidate library.
+    # The independent validation job above exercises the published app on Linux.
+    runs-on: macos-14
     timeout-minutes: 30
     env:
       MPLBACKEND: Agg
@@ -44,6 +46,8 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: python -m pip install -r requirements-dev.txt
+      - name: Confirm the reference architecture
+        run: python -c "import platform; assert platform.machine() == 'arm64', platform.machine()"
       - run: python -m scripts.reproduce
       - run: python -m scripts.verify_reproduction
       - name: Save the executed analysis
