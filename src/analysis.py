@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from src.modeling import SEED
+from src.modeling import SEED, calendar_block_ids
 
 
 def better_record_picks(games):
@@ -38,10 +38,10 @@ def better_record_picks(games):
     )
 
 
-def paired_accuracy_bootstrap(games, repetitions=2000):
+def paired_accuracy_bootstrap(games, repetitions=2000, block_weeks=1):
     """Resample complete calendar weeks, preserving the paired winner picks."""
     frame = games.copy()
-    frame["week"] = pd.to_datetime(frame.gamedate).dt.to_period("W")
+    frame["week"] = calendar_block_ids(frame.gamedate, block_weeks)
     frame["model_correct"] = frame.probability.ge(0.5).eq(frame.y).astype(int)
     frame["record_correct"] = frame.record_pick_home.eq(frame.y).astype(int)
     blocks = frame.groupby("week").agg(

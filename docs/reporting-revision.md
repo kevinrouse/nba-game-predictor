@@ -18,3 +18,11 @@ This rule was added **after the original test results were inspected**. Its comp
 4. **Interpretation:** evaluate the frozen model and record rule on identical games, quantify paired uncertainty, assess calibration/ranking, trace a probability into its additive inputs, examine both successful and failed disagreements, and state the remaining limitations.
 
 The Streamlit app follows the same sequence, with links to the corresponding notebook. New exploratory charts use development seasons unless explicitly labeled final-test diagnostics. Descriptive full-season summaries are never used as pregame predictors. Additional plots explain the implemented model; they do not retroactively select new inputs using the test season.
+
+## Subsequent robustness and reproducibility review
+
+The next review adds a chronological **selection replay** using the original 74-candidate library. Each evaluation season from 2018–19 to 2022–23 selects its configuration using only earlier validation-season scores, then reads the selected configuration's already-stored next-season predictions. This audits the selection rule's stability. The candidate library was designed during the original development process, so the replay is not a newly independent nested evaluation.
+
+The review also reports paired bootstrap intervals for all three fixed calendar block lengths: one, two and four weeks. Blocks are nonoverlapping and anchored at the first observed Monday–Sunday week; the last block can be partial. Longer blocks preserve more nearby games together but leave fewer blocks, including only six for four-week resampling. No block length is selected to obtain a favorable interval, and the original one-week headline remains unchanged.
+
+These are retrospective diagnostics of existing decisions and predictions. The review adds forecast audit exports, release verification and continuous reproduction checks without changing model inputs, fitted parameters or the original test forecasts.

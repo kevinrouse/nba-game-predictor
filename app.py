@@ -10,19 +10,25 @@ import streamlit as st
 
 from src.charts import CLAY, TEAL, feature_label, offense_defense, style
 from src.data import ROOT
+from src.game_report import forecast_record, resolve_game_id
 from src.story_views import basketball_questions, feature_workshop, model_comparison
 
 st.set_page_config(page_title="NBA Game Predictor", page_icon="🏀", layout="wide")
 TABLES = ROOT / "artifacts/tables"
 
 
-@st.cache_data
-def table(name):
+@st.cache_data(max_entries=60)
+def read_table(name, modified_ns):
+    # The modification time participates in the cache key after a local rebuild.
     frame = pd.read_csv(TABLES / name)
     for column in ["gamedate", "history_end", "player_history_end"]:
         if column in frame:
             frame[column] = pd.to_datetime(frame[column])
     return frame
+
+
+def table(name):
+    return read_table(name, (TABLES / name).stat().st_mtime_ns)
 
 
 @st.cache_data
@@ -40,6 +46,19 @@ def story_metadata():
 
 def go_to(section):
     st.session_state["section"] = section
+    sync_navigation()
+
+
+def sync_navigation():
+    if st.session_state["section"] != "Historical game predictor":
+        st.query_params.pop("game", None)
+
+
+def open_game(game_id):
+    st.session_state["section"] = "Historical game predictor"
+    st.session_state["predictor_team"] = "All teams"
+    st.session_state["prediction_game"] = int(game_id)
+    st.query_params["game"] = str(game_id)
 
 
 def season_label(year):
@@ -112,6 +131,11 @@ results, selection = metadata()
 story = story_metadata()
 history = table("team_history.csv.gz")
 predictions = table("record_comparison_games.csv")
+linked_game = resolve_game_id(st.query_params.get("game"), predictions.nbagameid)
+if "section" not in st.session_state:
+    st.session_state["section"] = (
+        "Historical game predictor" if linked_game is not None else "Home"
+    )
 with st.sidebar:
     st.markdown("### NBA Game Predictor")
     st.caption("A basketball project by Kevin Rouse")
@@ -133,6 +157,7 @@ with st.sidebar:
         ],
         label_visibility="collapsed",
         key="section",
+        on_change=sync_navigation,
     )
     st.divider()
     st.caption("2014–15 through 2023–24\n\nHistorical data. Pregame probabilities.")
@@ -140,6 +165,11 @@ with st.sidebar:
         "View the project on GitHub", "https://github.com/kevinrouse/nba-game-predictor"
     )
 
+
+if st.query_params.get("game") is not None and linked_game is None:
+    st.info(
+        "That game link is outside the eligible historical test games. Choose a game in the explorer."
+    )
 
 if page == "Home":
     st.caption("BEFORE TIPOFF")
@@ -241,6 +271,8 @@ elif page == "Model comparison":
         table("cv_summary.csv"),
         selection,
         table("feature_comparison.csv"),
+        table("selection_replay.csv"),
+        table("selection_replay_comparison.csv"),
     )
 
 elif page == "Team explorer":
@@ -431,7 +463,10 @@ elif page == "Historical game predictor":
         .off_team_name.to_dict()
     )
     code = st.selectbox(
-        "Team", ["All teams", *sorted(teams)], format_func=lambda x: teams.get(x, x)
+        "Team",
+        ["All teams", *sorted(teams)],
+        format_func=lambda x: teams.get(x, x),
+        key="predictor_team",
     )
     available = (
         predictions
@@ -443,14 +478,24 @@ elif page == "Historical game predictor":
     available = available.sort_values("gamedate", ascending=False).set_index(
         "nbagameid"
     )
+    if st.session_state.get("prediction_game") not in available.index:
+        st.session_state["prediction_game"] = (
+            linked_game if linked_game in available.index else int(available.index[0])
+        )
     game_id = st.selectbox(
         "Game",
         available.index.tolist(),
         format_func=lambda gid: (
             f"{available.loc[gid, 'gamedate']:%b %d, %Y} · {available.loc[gid, 'away_off_team']} at {available.loc[gid, 'home_off_team']}"
         ),
+        key="prediction_game",
     )
+    if st.query_params.get("game") != str(game_id):
+        st.query_params["game"] = str(game_id)
     game = available.loc[game_id]
+    st.caption(
+        "The address bar now links to this game. Copy its URL to share the same forecast."
+    )
     st.subheader("Pregame win probability")
     probability_cards(game)
     record_favorite = (
@@ -534,6 +579,19 @@ elif page == "Historical game predictor":
     st.caption(
         "The result is shown for comparison and was not used to create this game's probability."
     )
+    release = json.loads((ROOT / "artifacts/models/release.json").read_text())
+    report = forecast_record(
+        game, match, table("prediction_contributions.csv.gz"), release
+    )
+    st.download_button(
+        "Download this game's audit record",
+        json.dumps(report, indent=2, allow_nan=False),
+        file_name=f"nba-pregame-{game_id}.json",
+        mime="application/json",
+    )
+    st.caption(
+        "Includes the model identifier, history cutoffs, all input contributions and the observed result in a separate field."
+    )
 
 elif page == "What the model uses":
     st.title("What moves the prediction?")
@@ -605,6 +663,24 @@ elif page == "Performance":
     st.caption(
         "This record-rule comparison was added after the original test evaluation; all model predictions remain frozen. The interval describes this season, not performance across future seasons."
     )
+    with st.expander("Does the uncertainty depend on the length of a block?"):
+        sensitivity = table("block_sensitivity.csv")
+        shown = sensitivity[sensitivity.metric.eq("accuracy_difference")][
+            ["block_weeks", "blocks", "estimate", "lower", "upper"]
+        ].copy()
+        for column in ["estimate", "lower", "upper"]:
+            shown[column] *= 100
+        shown.columns = [
+            "Weeks per block",
+            "Blocks",
+            "Gain (percentage points)",
+            "95% lower",
+            "95% upper",
+        ]
+        st.dataframe(shown.round(2), hide_index=True, width="stretch")
+        st.write(
+            "The gain remains positive for all three choices. Longer blocks preserve more nearby games together, but leave fewer blocks to resample—only six for four weeks. This sensitivity check does not capture between-season uncertainty or turn the retrospective comparison into a new independent test."
+        )
     st.subheader("Then: check the quality of the probabilities")
     st.write(
         "The record rule gives a winner, not a calibrated probability. For log loss and Brier score, compare against fitted win-percentage and net-rating baselines instead of assigning the rule artificial 100% confidence."
@@ -752,6 +828,20 @@ elif page == "Biggest misses":
         column_config={
             "Favorite probability": st.column_config.NumberColumn(format="percent")
         },
+    )
+    inspect_id = st.selectbox(
+        "Inspect a game from this comparison",
+        misses.nbagameid.tolist(),
+        format_func=lambda gid: (
+            f"{misses.set_index('nbagameid').loc[gid, 'gamedate']:%b %d, %Y} · "
+            f"{misses.set_index('nbagameid').loc[gid, 'Matchup']}"
+        ),
+    )
+    st.button(
+        "Inspect this forecast",
+        on_click=open_game,
+        args=(inspect_id,),
+        key="inspect_forecast",
     )
     st.subheader("Which teams surprised the model?")
     errors = table("team_errors.csv")

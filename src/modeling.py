@@ -141,15 +141,29 @@ def calibration_table(y, p):
     return result
 
 
-def week_bootstrap(predictions, baseline="net_rating_probability", repetitions=2000):
-    """Paired resampling of calendar-week blocks within one test season."""
+def calendar_block_ids(dates, weeks=1):
+    """Nonoverlapping Monday–Sunday blocks, anchored at the first observed week."""
+    if not isinstance(weeks, int) or isinstance(weeks, bool) or weeks < 1:
+        raise ValueError("Block length must be a positive integer number of weeks")
+    dates = pd.to_datetime(dates)
+    if dates.empty or dates.isna().any():
+        raise ValueError("Block dates must be nonempty and complete")
+    ordinal = dates.dt.to_period("W").astype("int64")
+    return (ordinal - ordinal.min()) // weeks
+
+
+def week_bootstrap(
+    predictions, baseline="net_rating_probability", repetitions=2000, block_weeks=1
+):
+    """Paired resampling of fixed calendar blocks within one test season."""
     frame = predictions.copy()
-    frame["week"] = pd.to_datetime(frame.gamedate).dt.to_period("W")
+    frame["week"] = calendar_block_ids(frame.gamedate, block_weeks)
     y, p, b = (
         frame.y.to_numpy(),
         frame.probability.to_numpy(),
         frame[baseline].to_numpy(),
     )
+
     def loss(prob):
         return -(
             y * np.log(np.clip(prob, 1e-12, 1 - 1e-12))

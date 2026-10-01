@@ -1,0 +1,25 @@
+{
+  "status": "Retrospective diagnostics; original model and test predictions unchanged",
+  "replay_seasons": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "replay_choices": [
+    "L1 team_players C=0.1",
+    "L1 team_players C=0.1",
+    "L1 team_players C=0.1",
+    "L1 team_players C=0.1",
+    "L1 team_players C=0.1"
+  ],
+  "replay_mean_log_loss": 0.6286766399999999,
+  "baseline_mean_log_loss": 0.63379402472,
+  "block_lengths": [
+    1,
+    2,
+    4
+  ],
+  "caveat": "Candidate library was designed during original development; this is not nested independent evaluation"
+}

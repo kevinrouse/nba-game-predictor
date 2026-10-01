@@ -214,7 +214,15 @@ def feature_workshop(totals, roles, guide, example):
 
 
 def model_comparison(
-    families, matched, folds, configs, summary, selection, feature_comparison
+    families,
+    matched,
+    folds,
+    configs,
+    summary,
+    selection,
+    feature_comparison,
+    replay,
+    replay_comparison,
 ):
     st.caption("THE STORY · 3 / 4")
     st.title("Which model earned the extra detail?")
@@ -342,4 +350,52 @@ def model_comparison(
         )
     st.caption(
         "The selected model was frozen before the original 2023–24 evaluation. This presentation revision adds explanations and a record-rule comparison; it does not retune the model using that test."
+    )
+    st.subheader("Would earlier evidence have led to the same choice?")
+    st.write(
+        "For each season from 2018–19 through 2022–23, I replay the selection rule using only validation scores from preceding seasons. The upcoming season's score cannot influence that year's choice."
+    )
+    st.dataframe(
+        replay[["season", "last_tuning_season", "selected_name", "log_loss", "n"]]
+        .rename(
+            columns={
+                "season": "Evaluation season starts",
+                "last_tuning_season": "Last tuning season starts",
+                "selected_name": "Chosen before evaluation",
+                "log_loss": "Next-season loss",
+                "n": "Games",
+            }
+        )
+        .round(4),
+        hide_index=True,
+        width="stretch",
+    )
+    plot = replay_comparison.replace(
+        {
+            "procedure": {
+                "Baseline net_rating": "Net rating",
+                "Baseline win_pct": "Win percentage",
+            }
+        }
+    )
+    fig = px.line(
+        plot,
+        x="season",
+        y="log_loss",
+        color="procedure",
+        markers=True,
+        labels={
+            "season": "Evaluation season starting year",
+            "log_loss": "Log loss",
+            "procedure": "Procedure",
+        },
+        color_discrete_sequence=[CLAY, TEAL, "#8c8174"],
+    )
+    fig.update_layout(legend={"orientation": "h", "y": 1.2})
+    st.plotly_chart(style(fig, 330), width="stretch")
+    st.write(
+        "The same L1 team-plus-player model is selected in all five replays and beats the net-rating baseline in each upcoming season. The choice is stable under this audit."
+    )
+    st.caption(
+        "This is retrospective: the candidate library was designed during the original development process. Reusing that library does not create a fully independent nested evaluation. The original held-out 2023–24 result remains the final test."
     )

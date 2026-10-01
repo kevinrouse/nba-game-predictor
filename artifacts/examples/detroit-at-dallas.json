@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "model_id": "nba-pregame-4b971c0a5b78",
+  "model_name": "L1 team_players C=0.1",
+  "fitted_through_season_start_year": 2022,
+  "game": {
+    "id": 22301181,
+    "date": "2024-04-12",
+    "home": "DAL",
+    "away": "DET"
+  },
+  "pregame_forecast": {
+    "intercept_log_odds": 0.3305528442497632,
+    "home_probability": 0.9153110516,
+    "away_probability": 0.08468894839999996,
+    "favorite": "DAL",
+    "better_record_favorite": "DAL",
+    "record_rule": "Higher pregame winning percentage; exact ties favor home",
+    "records": {
+      "home": {
+        "wins": 50,
+        "games": 80
+      },
+      "away": {
+        "wins": 13,
+        "games": 80
+      }
+    },
+    "history_cutoffs": {
+      "home_history_end": "2024-04-10",
+      "home_player_history_end": "2024-04-10",
+      "away_history_end": "2024-04-11",
+      "away_player_history_end": "2024-04-11"
+    },
+    "inputs": [
+      {
+        "feature": "net_rating_diff",
+        "home_value": 3.139962152,
+        "away_value": -9.286205109,
+        "home_minus_away": 12.42616726,
+        "log_odds_contribution": 0.8670284453
+      },
+      {
+        "feature": "win_pct_diff",
+        "home_value": 0.625,
+        "away_value": 0.1625,
+        "home_minus_away": 0.4625,
+        "log_odds_contribution": 0.4432911954
+      },
+      {
+        "feature": "efg_diff",
+        "home_value": 0.5657417736,
+        "away_value": 0.527166974,
+        "home_minus_away": 0.03857479952,
+        "log_odds_contribution": 0.01272738776
+      },
+      {
+        "feature": "opp_efg_diff",
+        "home_value": 0.5468079213,
+        "away_value": 0.5580188017,
+        "home_minus_away": -0.0112108804,
+        "log_odds_contribution": -0.001584095649
+      },
+      {
+        "feature": "tov_rate_diff",
+        "home_value": 0.1129492299,
+        "away_value": 0.1379271583,
+        "home_minus_away": -0.02497792838,
+        "log_odds_contribution": -0.01446246704
+      },
+      {
+        "feature": "oreb_rate_diff",
+        "home_value": 0.2578105156,
+        "away_value": 0.2789235412,
+        "home_minus_away": -0.02111302563,
+        "log_odds_contribution": 0.01728099844
+      },
+      {
+        "feature": "dreb_rate_diff",
+        "home_value": 0.7090727318,
+        "away_value": 0.7290743155,
+        "home_minus_away": -0.0200015837,
+        "log_odds_contribution": -0.02370100022
+      },
+      {
+        "feature": "ft_rate_diff",
+        "home_value": 0.2527886224,
+        "away_value": 0.2484040289,
+        "home_minus_away": 0.00438459348,
+        "log_odds_contribution": -0.004712322955
+      },
+      {
+        "feature": "rest_days_diff",
+        "home_value": 1.0,
+        "away_value": 0.0,
+        "home_minus_away": 1.0,
+        "log_odds_contribution": -0.007684657425
+      },
+      {
+        "feature": "back_to_back_diff",
+        "home_value": 0.0,
+        "away_value": 1.0,
+        "home_minus_away": -1.0,
+        "log_odds_contribution": 0.1985395655
+      },
+      {
+        "feature": "games_last7_diff",
+        "home_value": 4.0,
+        "away_value": 4.0,
+        "home_minus_away": 0.0,
+        "log_odds_contribution": -0.001837096517
+      },
+      {
+        "feature": "top5_share_diff",
+        "home_value": 0.6384417372,
+        "away_value": 0.5406243265,
+        "home_minus_away": 0.09781741073,
+        "log_odds_contribution": 0.0
+      },
+      {
+        "feature": "top7_share_diff",
+        "home_value": 0.830121137,
+        "away_value": 0.7102269962,
+        "home_minus_away": 0.1198941408,
+        "log_odds_contribution": 0.0
+      },
+      {
+        "feature": "rotation_size_diff",
+        "home_value": 8.6,
+        "away_value": 9.2,
+        "home_minus_away": -0.6,
+        "log_odds_contribution": 0.007604042982
+      },
+      {
+        "feature": "minute_continuity_diff",
+        "home_value": 0.885280832,
+        "away_value": 0.7837443053,
+        "home_minus_away": 0.1015365267,
+        "log_odds_contribution": 0.0
+      },
+      {
+        "feature": "starter_continuity_diff",
+        "home_value": 0.92,
+        "away_value": 0.84,
+        "home_minus_away": 0.08,
+        "log_odds_contribution": 0.0110811833
+      },
+      {
+        "feature": "rotation_volatility_diff",
+        "home_value": 0.1516971542,
+        "away_value": 0.2425062664,
+        "home_minus_away": -0.09080911223,
+        "log_odds_contribution": -0.02416893019
+      },
+      {
+        "feature": "scoring_concentration_diff",
+        "home_value": 0.1540985665,
+        "away_value": 0.09693680713,
+        "home_minus_away": 0.05716175934,
+        "log_odds_contribution": 0.2329797253
+      },
+      {
+        "feature": "usage_concentration_diff",
+        "home_value": 0.148213038,
+        "away_value": 0.0981755073,
+        "home_minus_away": 0.05003753066,
+        "log_odds_contribution": 0.03070765999
+      },
+      {
+        "feature": "weighted_ppa_diff",
+        "home_value": 1.171144531,
+        "away_value": 1.122348112,
+        "home_minus_away": 0.04879641993,
+        "log_odds_contribution": 0.02554043409
+      },
+      {
+        "feature": "weighted_absence_diff",
+        "home_value": 0.1661083011,
+        "away_value": 0.4105010602,
+        "home_minus_away": -0.2443927591,
+        "log_odds_contribution": 0.1315865065
+      },
+      {
+        "feature": "weighted_participation_diff",
+        "home_value": 0.8079825915,
+        "away_value": 0.5179856698,
+        "home_minus_away": 0.2899969217,
+        "log_odds_contribution": 0.1495094227
+      }
+    ]
+  },
+  "observed_result": {
+    "availability": "Postgame; excluded from the prediction inputs",
+    "home_points": 89,
+    "away_points": 107,
+    "home_win": false
+  }
+}

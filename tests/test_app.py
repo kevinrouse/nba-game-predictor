@@ -77,3 +77,30 @@ def test_home_chapter_navigation():
     app.button(key="chapter_next").click().run()
     check(app)
     assert app.sidebar.radio[0].value == "Feature workshop"
+
+
+def test_game_links_and_navigation_from_a_miss():
+    app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30)
+    app.query_params["game"] = "22301095"
+    app.run()
+    check(app)
+    assert app.sidebar.radio[0].value == "Historical game predictor"
+    assert app.selectbox(key="prediction_game").value == 22301095
+    app.selectbox(key="prediction_game").select_index(-1).run()
+    assert app.query_params["game"] == [str(app.selectbox(key="prediction_game").value)]
+    app.sidebar.radio[0].set_value("Biggest misses").run()
+    assert "game" not in app.query_params
+    expected = app.selectbox[1].value
+    app.button(key="inspect_forecast").click().run()
+    check(app)
+    assert app.sidebar.radio[0].value == "Historical game predictor"
+    assert app.selectbox(key="prediction_game").value == expected
+
+
+def test_unknown_game_link_falls_back_without_crashing():
+    app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30)
+    app.query_params["game"] = "not-an-eligible-game"
+    app.run()
+    check(app)
+    assert app.sidebar.radio[0].value == "Home"
+    assert any("outside the eligible" in item.value for item in app.info)

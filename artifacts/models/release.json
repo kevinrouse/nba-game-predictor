@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "model_id": "nba-pregame-4b971c0a5b78",
+  "selected_model": "L1 team_players C=0.1",
+  "train_seasons": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "test_season": 2023,
+  "features": [
+    "net_rating_diff",
+    "win_pct_diff",
+    "efg_diff",
+    "opp_efg_diff",
+    "tov_rate_diff",
+    "oreb_rate_diff",
+    "dreb_rate_diff",
+    "ft_rate_diff",
+    "rest_days_diff",
+    "back_to_back_diff",
+    "games_last7_diff",
+    "top5_share_diff",
+    "top7_share_diff",
+    "rotation_size_diff",
+    "minute_continuity_diff",
+    "starter_continuity_diff",
+    "rotation_volatility_diff",
+    "scoring_concentration_diff",
+    "usage_concentration_diff",
+    "weighted_ppa_diff",
+    "weighted_absence_diff",
+    "weighted_participation_diff"
+  ],
+  "intercept_log_odds": 0.3305528442497632,
+  "python": "3.11",
+  "versions": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "joblib": "1.6.0"
+  },
+  "sha256": {
+    "Data/team_game_data.csv.gz": "2846b43180855a8aea612f0cc9955e23e225af956441fe6477ec9f8f7912529e",
+    "Data/player_game_data.csv.gz": "8df7ee4746cd8509184f9635482d6d124df19b7f1298df87b882c3b41a2ca936",
+    "artifacts/models/selection.json": "9b99b4b52bc75ade3acccc002b30f99c9df5594276af0390820efbf3d3a265b3",
+    "artifacts/models/frozen_models.joblib": "4b971c0a5b78c6606a1f1ac84cb6cb8db89c20d0ca4007c35a248bcd331ab083",
+    "artifacts/tables/matchups.csv.gz": "5124d94ba254e65570c10ef3cf1a1b924e72f95a1b884544aca377cf07420f6a",
+    "artifacts/tables/team_history.csv.gz": "e08dca1edab427916f31f6fa66ff5f16c311c65b240b28cb16d4a79b57d12b95",
+    "artifacts/tables/player_roles.csv.gz": "6e3cfe2e79d8d4dab7b23080e20fdf058d93b067695258547381658c3854587f",
+    "artifacts/tables/test_predictions.csv": "dbd5f7c462836cab92ba22ecde0b79d7ce637d6f82e2bdc26f5afb4c3fcaa58a",
+    "artifacts/tables/record_comparison_games.csv": "3869b8c5bf92396a82ddbd3941abc3cef360c28c805938b3bd302b9960348ec8",
+    "artifacts/tables/prediction_contributions.csv.gz": "fce9a7482d75494df1f61d0700fc45c2ce6f1abb2de7976ba7f09d5a175f93a3",
+    "artifacts/tables/importance.csv": "18ab65887b819311ce9702bf248e22bef823039575fd4ad2998964df56131fe4",
+    "artifacts/tables/intercept.json": "f2da28cd71e51304968d9c73684842ff7de1519ef9c587e24be0659a44023adf"
+  }
+}
