@@ -64,3 +64,9 @@ These are participation histories, not confirmed injury status. Previous roster 
 One home/away pair becomes one prediction row. Both teams must have ten prior regular-season games. This covers 10,418 of 11,979 games; 1,074 of 1,230 in the final season. Explorers retain all games. No prediction is silently filled in for an excluded opener.
 
 `history_end` and `player_history_end` must precede `gamedate` for both sides. Tests additionally modify current/future statistics, delete future records, remove the current roster, check unequal prior-role weights, and regenerate published probabilities from the frozen model. Scores and outcomes remain metadata excluded from every candidate input list.
+
+## Worked calculations and reporting rule
+
+[Notebook 2](../notebooks/02_pregame_features.ipynb) reconstructs Clippers at Thunder on December 15, 2018, from earlier raw rows. Its team ratios, rolling windows, weighted player summaries and continuity calculation reconcile to the saved features. The dashboard's Feature workshop exposes the same example and links each candidate to its basketball motivation, definition and caveat.
+
+The added better-record decision rule compares the two pregame win percentages, with home favored on exact ties. Prior integer wins are recovered from win percentage × prior games and compared by cross-multiplication, so rounded CSV values cannot turn equivalent records into false inequalities. It never consults the current outcome or final standings. This is a winner-only reporting benchmark, distinct from the original fitted win-percentage probability baseline; see the [reporting revision](reporting-revision.md).

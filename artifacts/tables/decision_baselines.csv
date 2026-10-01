@@ -1,0 +1,6 @@
+strategy,correct,games,accuracy
+Always home,577,1074,0.5372439479
+Better pregame record,688,1074,0.6405959032
+Win-percentage logistic,697,1074,0.6489757914
+Net-rating logistic,693,1074,0.6452513966
+Selected team + player model,723,1074,0.6731843575

@@ -12,6 +12,7 @@ def main():
         "compare_models",
         "evaluate",
         "explore",
+        "story_analysis",
         "execute_notebooks",
     ]:
         subprocess.run(

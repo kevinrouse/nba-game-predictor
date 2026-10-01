@@ -2,9 +2,9 @@
 
 I wanted to see how well NBA games could be predicted using only team and player histories available before tipoff. Season records tell part of the story, but rotations change, players miss games, and recent performance can look different from a team's full season.
 
-This project builds a pregame home-win probability model and a Streamlit app for exploring the games behind it.
+The central question is whether those extra details earn their complexity over a simple basketball rule: **pick the team with the better record before the game**. This project follows that question from the source-data audit through feature construction, chronological model comparisons and a Streamlit app for inspecting individual predictions.
 
-**Final test: 1,074 games in 2023–24 · 67.3% accuracy · 0.6025 log loss.**
+**2023–24: 67.3% correct versus 64.1% for the better-record rule—35 additional correct picks across 1,074 games.**
 
 [Explore the notebooks](notebooks/) · [Run the dashboard](#running-locally) · [Deployment instructions](docs/deployment.md)
 
@@ -18,18 +18,47 @@ I was interested in what makes one team more likely to beat another on a particu
 
 ## How well did it work?
 
-The model was selected using earlier seasons and frozen before evaluating 2023–24. All rows below use the same eligible games.
+The model was selected using earlier seasons and frozen before evaluating 2023–24. Every comparison uses the same 1,074 eligible games.
+
+### Picking a winner
+
+| Decision | Correct picks | Accuracy |
+|---|---:|---:|
+| Always pick home | 577 | 53.7% |
+| Pick the higher pregame win percentage; ties favor home | 688 | 64.1% |
+| **Pick the frozen model's favorite** | **723** | **67.3%** |
+
+The model and record rule disagree on 163 games. The model gets 99 of those right; the record rule gets 64. The accuracy gain is **3.26 percentage points**, with a paired week-block bootstrap interval of **+1.38 to +5.31 points**. That measures uncertainty within this season, not the range of gains to expect in future seasons.
+
+The hard record rule was added **after the original evaluation**, in this [reporting revision](docs/reporting-revision.md). It did not change the fitted model, favorite threshold or stored probabilities. It compares pregame winning percentages rather than total wins or final standings; 18 exact ties favor home. Because the rule supplies no probability, it receives no artificial log-loss or Brier score.
+
+### Estimating useful probabilities
+
+The fitted win-percentage baseline below is a separate model: it learns how record differences and home advantage translate into probabilities. Log loss, rather than winner accuracy, was the original selection objective.
 
 | Model | Log loss ↓ | Brier score ↓ | ROC AUC ↑ | Accuracy ↑ |
 |---|---:|---:|---:|---:|
 | Historical home win rate | 0.6929 | 0.2499 | 0.5000 | 53.7% |
-| Season win percentage | 0.6122 | 0.2129 | 0.7208 | 64.9% |
-| Season net rating | 0.6120 | 0.2127 | 0.7206 | 64.5% |
+| Win-percentage logistic baseline | 0.6122 | 0.2129 | 0.7208 | 64.9% |
+| Net-rating logistic baseline | 0.6120 | 0.2127 | 0.7206 | 64.5% |
 | **Team and player histories** | **0.6025** | **0.2080** | **0.7345** | **67.3%** |
 
 The selected model is L1 logistic regression, with `C=0.1`. The paired log-loss difference against net rating is −0.0095, with a 95% week-block bootstrap interval of **−0.0155 to −0.0032**. That supports an improvement within this test season; it does not establish its size across future seasons.
 
 Calibration was reasonable overall, with an offset toward home teams: 56.1% average predicted home-win probability versus 53.7% observed. The diagnostic calibration slope was 1.058. I did not use these test diagnostics to refit or recalibrate the model.
+
+## Follow the analysis
+
+Each executed notebook poses a question, performs the calculations, interprets the evidence and explains what it changes about the next step. The dashboard's first four chapters follow the same sequence.
+
+| Notebook | What it establishes | Dashboard chapter |
+|---|---|---|
+| [1. Data and EDA](notebooks/01_data_and_eda.ipynb) | Source grain and defects; season strength, shooting, possession control, recent form, rotations and rest; why each is a candidate and where the descriptive evidence can mislead | Basketball questions |
+| [2. Pregame features](notebooks/02_pregame_features.ipynb) | A real Clippers–Thunder example calculated from earlier raw records; opponent joins, ratio denominators, shifted windows, individual role weights, signed matchup inputs and leakage checks | Feature workshop |
+| [3. Modeling](notebooks/03_modeling.ipynb) | Actual fits for five model families and three probability baselines; six chronological validation windows, common-input comparisons, regularization, overfitting, feature additions and the fixed selection rule | Model comparison |
+| [4. Interpretation](notebooks/04_model_interpretation.ipynb) | Frozen test performance against the record rule and probability baselines; paired intervals, calibration, ranking, exact prediction contributions, successful disagreements and confident mistakes | Performance |
+
+The modeling notebook reproduces an actual validation fold on common inputs rather than merely loading a leaderboard. The feature notebook reconciles its hand-worked team and player calculations to the saved model inputs. The interpretation notebook rebuilds individual probabilities from standardized inputs and coefficients.
 
 ## Data
 
@@ -51,6 +80,8 @@ Inputs compare home and away teams. Team counts are shifted before cumulative or
 
 Both teams need ten prior games that season. That leaves **10,418 eligible games**, including **9,344 development games** and **1,074 final-test games**. Opening games supply history and remain in the explorers, but do not receive predictions.
 
+For example, before Clippers at Thunder on December 15, 2018, OKC had 27 earlier games and LAC had 28. The feature workshop exposes the actual point/possession totals, the last source date, and each OKC player's prior role and scoring contribution. This connects a basketball idea to the precise value that reaches a model.
+
 ## What I learned along the way
 
 - Player histories reduced mean validation log loss from **0.6281 to 0.6250**, improving five of six validation seasons compared with the same L1 team-only model.
@@ -63,7 +94,15 @@ These are development findings, not independent estimates of the benefit of ever
 
 ## Exploring the predictions
 
-The app has team and roster explorers, a historical game selector, model inputs, performance, biggest misses, and concise methodology. The game selector uses only the reserved season, with pregame probabilities clearly separated from actual results.
+Start with the four guided analytical chapters, then inspect the supporting explorers:
+
+- **Team explorer:** compare season strength with five-, ten- and twenty-game form, with an explanation of the selected measure.
+- **Roster explorer:** inspect historical roles, scoring efficiency and participation, down to each player's weighted contribution.
+- **Historical game predictor:** compare both teams' pregame records, the simple rule and the model's pick; trace the predicted probability through exact additive log-odds contributions.
+- **What the model uses:** connect every candidate input to its basketball question, calculation, fitted weight and limitation—including inputs L1 sets to zero.
+- **Biggest misses:** compare confident errors with games where the model beats the record rule and games where the rule wins. Both directions matter.
+
+Development exploration and final-test diagnostics are labeled throughout. The historical game selector uses the reserved season, with pregame probabilities clearly separated from actual results.
 
 One notable miss: Dallas was a **91.5%** home favorite against Detroit on April 12, 2024, but lost **89–107**. The data show what the model missed, without establishing a story about injuries or late lineup changes.
 
@@ -95,7 +134,7 @@ pip install -r requirements-dev.txt
 python -m scripts.reproduce
 ```
 
-Individual steps are `scripts.build_data`, `scripts.compare_models`, `scripts.evaluate`, `scripts.explore` and `scripts.execute_notebooks`. Seeds are fixed at 78; paths are relative to the repository. The source checksums are recorded in `artifacts/tables/audit.json`.
+Individual steps are `scripts.build_data`, `scripts.compare_models`, `scripts.evaluate`, `scripts.explore`, `scripts.story_analysis` and `scripts.execute_notebooks`. The story-analysis step derives the record comparison, worked examples and explanatory tables from the frozen artifacts without refitting a model. Seeds are fixed at 78; paths are relative to the repository. The source checksums are recorded in `artifacts/tables/audit.json`.
 
 | Location | Contents |
 |---|---|

@@ -1,0 +1,5 @@
+model_correct,record_correct,games
+False,False,287
+False,True,64
+True,False,99
+True,True,624

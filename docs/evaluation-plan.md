@@ -16,3 +16,7 @@ Fixed before comparing game models. Season numbers are starting years.
 - Every team's feature history must end strictly before its predicted game date. Mutation and truncation tests will verify this for team and player inputs.
 
 No external basketball data, travel information or betting prices are used. Playoff transfer is optional and outside this project's primary evaluation.
+
+## Subsequent reporting addition
+
+The [analysis and presentation revision](reporting-revision.md) adds a hard better-record winner rule after the original test evaluation. It supplements this original plan without changing the selected model or its predictions. Its accuracy comparison is retrospective; the original probability baselines and selection objective remain as specified above.

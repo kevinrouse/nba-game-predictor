@@ -1,0 +1,4 @@
+stage_of_season,games,model_accuracy,record_accuracy
+10–24 prior games,228,0.701754386,0.6885964912
+25–49 prior games,372,0.6720430108,0.6290322581
+50+ prior games,474,0.6603375527,0.6265822785

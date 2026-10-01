@@ -1,0 +1,5 @@
+schedule,home_win_rate,games,mean_strength_diff
+Both on back-to-backs,0.6126315789,475,-0.1305413907
+Neither on back-to-back,0.5677008751,6285,-0.1314671855
+Only away on back-to-back,0.6126279863,1758,-0.08842669244
+Only home on back-to-back,0.5036319613,826,-0.04198030037

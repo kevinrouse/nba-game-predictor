@@ -1,0 +1,22 @@
+{
+  "test_games": 1074,
+  "model_correct": 723,
+  "record_correct": 688,
+  "model_accuracy": 0.6731843575418994,
+  "record_accuracy": 0.6405959031657356,
+  "ties": 18,
+  "extra_correct": 35,
+  "disagreements": 163,
+  "model_only_correct": 99,
+  "record_only_correct": 64,
+  "accuracy_interval": {
+    "metric": "accuracy_difference",
+    "estimate": 0.032588454376163874,
+    "lower": 0.013798183178080759,
+    "upper": 0.053114543114543104,
+    "blocks": 22,
+    "repetitions": 2000
+  },
+  "rule": "Higher pregame win percentage; exact ties favor home",
+  "comparison_status": "Added after the original test evaluation; frozen predictions unchanged"
+}

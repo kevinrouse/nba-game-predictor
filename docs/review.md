@@ -34,6 +34,10 @@ Player histories improve the matching L1 team-only comparison in five of six val
 
 ## The reserved season
 
+The added better-record decision rule picks 688 of 1,074 games correctly (64.06%); the frozen model picks 723 (67.32%). Exact percentage ties favor home, affecting 18 games. The rules disagree on 163 games: the model is correct on 99 and the record rule on 64. The paired week-block interval for the 3.26-percentage-point accuracy gain is +1.38 to +5.31 points, using 2,000 draws of the same 22 calendar weeks. This comparison was added after the original evaluation and does not select or modify the model. See the [reporting revision](reporting-revision.md).
+
+The hard winner rule is not a probability estimate. Its comparison is accuracy-only; the original fitted probability baselines remain below.
+
 | Model | Log loss | Brier | AUC | Accuracy |
 |---|---:|---:|---:|---:|
 | Selected model | 0.602463 | 0.207969 | 0.734480 | 67.32% |
@@ -58,18 +62,20 @@ Predicted home wins average 56.08%, versus 53.72% observed. Calibration slope is
 
 **Statistical quality.** Inputs end before game dates, mutation/truncation tests verify the boundary, and learned preprocessing uses training folds only. The final season does not select the model. Model-selection scores can be optimistic after trying 74 configurations; the held-out season is the independent result. One season limits generalization claims.
 
-**Predictive quality.** The final model improves on each baseline in the reserved season, and player gains occur in five of six development seasons. It still overestimates home advantage somewhat. A strong forest training score does not translate into better later-season probabilities: the 20-leaf-minimum combined forest has training loss 0.5246 versus validation 0.6321. The selected logistic model has 0.6036 versus 0.6250. That supports retaining the simpler fit.
+**Predictive quality.** The final model improves on each baseline in the reserved season, and player gains occur in five of six development seasons. It still overestimates home advantage somewhat. A strong forest training score does not translate into better later-season probabilities: the combined forest with a minimum of 20 samples per leaf has training loss 0.5246 versus validation 0.6321. The selected logistic model has 0.6036 versus 0.6250. That supports retaining the simpler fit.
 
 **Code and reproducibility.** Direct functions handle the joins, histories and model comparison; no framework or class hierarchy is needed. Only source data and prior rows determine the features. Compressed sources, derived tables and model artifacts are included, with separate minimal runtime and analysis requirements. Seeds and relative paths support reproduction.
 
 **Communication.** The public story is basketball prediction. The app separates probabilities from results and validation from the final test. Notebook findings report small effects cautiously. Correlated coefficients are not presented as causal effects; weak sign changes are not converted into basketball claims.
 
+The four expanded notebooks now develop one sequence: basketball questions, reconstructing prior information, comparing model families, and interpreting frozen predictions. Worked calculations reconcile team ratios, player contributions and a full predicted probability to the saved artifacts. Model comparison includes the best searched family settings and a common-input comparison, with actual last-fold fits, regularization paths, feature additions and season variation. Error analysis includes successful and unsuccessful departures from the record rule, calibration counts, ROC curves, team residuals and season-stage diagnostics. These additions explain the original fit without changing it.
+
 **Scope.** The site offers histories and held-out game predictions, not a live injury-aware service. There is no evidence to support a 2024 playoff simulation from these files, and the revised project does not need one. Opening games, unobserved current roster information and neutral sites remain limitations.
 
 ## Verification
 
-Eight tests pass, covering source reconciliation, unique matchups, strictly earlier dates, current/future mutation invariance, truncation invariance, historical role weights, removal of a current roster, frozen model/preprocessing integrity, probability sums, selection logic, bootstrap pairing, and all eight app pages with representative selector combinations. The four notebooks execute with stored outputs and no cell errors. Static checks pass. The local Streamlit app renders on desktop and at a 390-pixel viewport without horizontal body overflow.
+Thirteen tests pass, covering source reconciliation, unique matchups, strictly earlier dates, current/future mutation invariance, truncation invariance, historical role weights, removal of a current roster, frozen model/preprocessing integrity, probability sums, selection logic, bootstrap pairing, exact record-rule ties and same-game comparisons, reconstruction of probability contributions and worked player inputs, and all eleven app sections with representative selector combinations. The four notebooks execute with stored outputs and no cell errors. Static checks pass. The local Streamlit app renders on desktop and at a 390-pixel viewport without horizontal body overflow.
 
-A fresh local clone with a newly created Python 3.11 environment installed `requirements-dev.txt` and completed `python -m scripts.reproduce`. All four notebooks and all eight tests passed again. Pregame team, player-role and matchup files reproduced byte for byte. Final predictions, metrics, bootstrap intervals, coefficient tables and validation summaries matched to 1e-10. The model selection was identical, and private notes were absent from the clone. Browser navigation through all eight pages produced no JavaScript errors.
+Before this reporting revision, a fresh local clone with a newly created Python 3.11 environment installed `requirements-dev.txt` and completed `python -m scripts.reproduce`. All four notebooks and all eight tests passed again. Pregame team, player-role and matchup files reproduced byte for byte. Final predictions, metrics, bootstrap intervals, coefficient tables and validation summaries matched to 1e-10. The model selection was identical, and private notes were absent from the clone. Browser navigation through all eight pages produced no JavaScript errors.
 
 Private interview notes, environments, credentials, caches, original R session files, editor files and notebook checkpoints are excluded from Git. The original playoff repository remains unchanged. Cloud deployment still requires an authenticated Streamlit session; see [deployment status](deployment.md).
