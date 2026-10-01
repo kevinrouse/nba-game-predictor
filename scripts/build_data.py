@@ -3,9 +3,9 @@
 import gzip
 import hashlib
 import json
-import pandas as pd
+
 from src.data import ROOT, load_data, validate_data
-from src.features import build_team_history, build_roster_history, build_matchups
+from src.features import build_matchups, build_roster_history, build_team_history
 
 TABLES = ROOT / "artifacts/tables"
 
@@ -31,7 +31,12 @@ def main():
     roster, roles = build_roster_history(history, player)
     history = history.merge(roster, on=["nbagameid", "off_team"], validate="one_to_one")
     matchups = build_matchups(history)
-    coverage = matchups.groupby("season").agg(games=("nbagameid", "size"), eligible=("eligible", "sum"), start=("gamedate", "min"), end=("gamedate", "max"))
+    coverage = matchups.groupby("season").agg(
+        games=("nbagameid", "size"),
+        eligible=("eligible", "sum"),
+        start=("gamedate", "min"),
+        end=("gamedate", "max"),
+    )
     report["regular_games"] = len(matchups)
     report["eligible_games"] = int(matchups.eligible.sum())
     report["test_season"] = 2023

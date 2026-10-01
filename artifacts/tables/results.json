@@ -1,0 +1,16 @@
+{
+  "selected_model": "L1 team_players C=0.1",
+  "test_season": 2023,
+  "log_loss": 0.6024626649512177,
+  "brier": 0.20796874384730613,
+  "auc": 0.7344796683044541,
+  "accuracy": 0.6731843575418994,
+  "n": 1074,
+  "observed_home_win_rate": 0.537243947858473,
+  "predicted_home_win_rate": 0.560758562687905,
+  "calibration_intercept": -0.12591619928471026,
+  "calibration_slope": 1.0583136530278936,
+  "calibration_ece": 0.03670847509911926,
+  "train_games": 9344,
+  "validation_log_loss": 0.6249791716462022
+}

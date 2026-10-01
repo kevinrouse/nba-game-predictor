@@ -3,8 +3,15 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from src.data import load_data, validate_data
-from src.features import build_team_history, build_roster_history, build_matchups, feature_sets, ROSTER
+from src.features import (
+    ROSTER,
+    build_matchups,
+    build_roster_history,
+    build_team_history,
+    feature_sets,
+)
 
 
 @pytest.fixture(scope="module")
@@ -12,7 +19,9 @@ def records():
     team, player = load_data()
     games, audit, _, mismatch = validate_data(team, player)
     assert audit["duplicates"] == 0 and mismatch.empty
-    keep = games.season.eq(2014) & games.gamedate.le("2014-12-15") & games.gametype.eq(2)
+    keep = (
+        games.season.eq(2014) & games.gamedate.le("2014-12-15") & games.gametype.eq(2)
+    )
     games = games[keep].copy()
     player = player[player.nbagameid.isin(games.nbagameid)].copy()
     return games, player
@@ -21,7 +30,9 @@ def records():
 def construct(games, players):
     history = build_team_history(games)
     roster, _ = build_roster_history(history, players)
-    return build_matchups(history.merge(roster, on=["nbagameid", "off_team"], validate="one_to_one"))
+    return build_matchups(
+        history.merge(roster, on=["nbagameid", "off_team"], validate="one_to_one")
+    )
 
 
 def test_matchup_keys_and_strict_history(records):
@@ -53,27 +64,50 @@ def test_current_and_future_box_scores_cannot_change_pregame_features(records):
     altered = construct(altered_games, altered_player)
     columns = sorted(set(sum(feature_sets().values(), [])))
     mask = reference.gamedate.le(cutoff)
-    pd.testing.assert_frame_equal(reference.loc[mask, columns], altered.loc[mask, columns])
+    pd.testing.assert_frame_equal(
+        reference.loc[mask, columns], altered.loc[mask, columns]
+    )
 
 
 def test_deleting_future_records_preserves_history(records):
     games, player = records
     cutoff = pd.Timestamp("2014-12-01")
     full = construct(games, player)
-    short = construct(games[games.gamedate.le(cutoff)], player[player.gamedate.le(cutoff)])
+    short = construct(
+        games[games.gamedate.le(cutoff)], player[player.gamedate.le(cutoff)]
+    )
     columns = ["nbagameid", *sorted(set(sum(feature_sets().values(), [])))]
-    pd.testing.assert_frame_equal(full.loc[full.gamedate.le(cutoff), columns].reset_index(drop=True), short[columns])
+    pd.testing.assert_frame_equal(
+        full.loc[full.gamedate.le(cutoff), columns].reset_index(drop=True),
+        short[columns],
+    )
 
 
 def test_roles_weight_prior_regulars_and_ignore_current_roster():
     dates = pd.date_range("2020-01-01", periods=11, freq="2D")
-    history = pd.DataFrame(dict(season=2019, off_team="T", nbagameid=np.arange(11), gamedate=dates))
+    history = pd.DataFrame(
+        dict(season=2019, off_team="T", nbagameid=np.arange(11), gamedate=dates)
+    )
     rows = []
     for game in range(11):
         for person, minutes in [(1, 30), (2, 3)]:
-            rows.append(dict(season=2019, team="T", nbagameid=game, gametype=2,
-                             nbapersonid=person, player_name=str(person), seconds=minutes*60,
-                             points=10, shotattempts=5, shotattemptpoints=10, turnovers=1, starter=person==1, missed=0))
+            rows.append(
+                dict(
+                    season=2019,
+                    team="T",
+                    nbagameid=game,
+                    gametype=2,
+                    nbapersonid=person,
+                    player_name=str(person),
+                    seconds=minutes * 60,
+                    points=10,
+                    shotattempts=5,
+                    shotattemptpoints=10,
+                    turnovers=1,
+                    starter=person == 1,
+                    missed=0,
+                )
+            )
     players = pd.DataFrame(rows)
     snapshots, roles = build_roster_history(history, players)
     prior = roles[roles.nbagameid.eq(10)].set_index("player_id")

@@ -1,13 +1,16 @@
 """Read supplied game records and validate their relationships."""
 
 from pathlib import Path
+
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_data(root=ROOT):
-    team = pd.read_csv(Path(root) / "Data/team_game_data.csv.gz", parse_dates=["gamedate"])
+    team = pd.read_csv(
+        Path(root) / "Data/team_game_data.csv.gz", parse_dates=["gamedate"]
+    )
     player = pd.read_csv(
         Path(root) / "Data/player_game_data.csv.gz", parse_dates=["gamedate"]
     )
@@ -110,4 +113,3 @@ def validate_data(team, player):
         contradictions,
         point_mismatch,
     )
-

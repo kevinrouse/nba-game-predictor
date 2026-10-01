@@ -1,0 +1,23 @@
+{
+  "development_home_win_rate": 0.5715880547027631,
+  "mean_top5_share": 0.6020786110731228,
+  "mean_continuity": 0.8343107280225253,
+  "recent_net_correlation": 0.7935955466433965,
+  "player_improvement_seasons": 5,
+  "rotation_stories": [
+    {
+      "team": "MIN",
+      "season": 2017,
+      "volatility": 0.1072440238275,
+      "continuity": 0.8937435146916667,
+      "top5_share": 0.6968941184694445
+    },
+    {
+      "team": "BOS",
+      "season": 2020,
+      "volatility": 0.2431313735967742,
+      "continuity": 0.7874945235370967,
+      "top5_share": 0.5658539653193548
+    }
+  ]
+}
