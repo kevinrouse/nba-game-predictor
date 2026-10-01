@@ -36,7 +36,7 @@ The pipeline runs, in order:
 
 All paths are repository-relative and random seeds are 78. No basketball API or external account is needed. The pipeline does overwrite generated artifacts in that checkout; use a clean clone when comparing a new implementation with the published result.
 
-`verify_reproduction` compares every tracked analytical CSV, including compressed tables, against Git `HEAD`. Identifiers, column names, row order and the selected configuration must match. Floating-point comparisons allow absolute tolerance `1e-8` and relative tolerance `1e-7` for platform arithmetic. This is not permission to change a result materially. Serialized-model byte hashes are checked **before** a rebuild; the rebuilt model is checked through its predictions and selection afterward.
+`verify_reproduction` compares every tracked analytical CSV, including compressed tables, against Git `HEAD`. Identifiers, integer counts, nonnumeric values, column names, row order and the selected configuration must match exactly. A regression test rejects even a one-unit game-ID change; numerical tolerances apply only to floating-point columns. Floating-point comparisons allow absolute tolerance `1e-8` and relative tolerance `1e-7` for platform arithmetic. This is not permission to change a result materially. Serialized-model byte hashes are checked **before** a rebuild; the rebuilt model is checked through its predictions and selection afterward.
 
 To publish a deliberately changed model, review the evaluation design and artifacts first, then explicitly write a new release manifest. The existing test season is already inspected and cannot become a new untouched test simply by rerunning the pipeline.
 
